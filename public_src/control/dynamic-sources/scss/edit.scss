@@ -1,0 +1,53 @@
+$gray: #dedede;
+$orangered: #F15D30;
+$white: #f4f4f4;
+
+.wp-block-toolset-blocks-wrapper {
+	.empty-dynamic-source-content-notice {
+		color: $gray;
+		font-style: italic;
+		min-height: 60px;
+		display: flex;
+		align-items: center;
+	}
+}
+
+.is-selected .wp-block-toolset-blocks-wrapper.dynamic {
+	border: 1px solid $orangered;
+
+	.editor-block-list__breadcrumb {
+		left: unset;
+		top: -17px;
+		right: -1px;
+		z-index: 100000;
+
+		.components-toolbar {
+			color: $white;
+			background: $orangered;
+			padding: 0 2px;
+
+			.breadcrumb-label {
+				vertical-align: middle;
+				line-height: 18px;
+			}
+
+			.components-spinner {
+				background-color: $white;
+				margin: 0 5px 0 0;
+
+				&::before {
+					background-color: $orangered;
+				}
+			}
+		}
+	}
+
+	.tb-overlay {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: rgba(244, 244, 244, 0.7);
+	}
+}

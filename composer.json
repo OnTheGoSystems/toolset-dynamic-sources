@@ -1,0 +1,18 @@
+{
+    "name": "toolset/dynamic-sources",
+    "description": "Toolset Dynamic Sources API for blocks",
+    "authors": [
+        {
+            "name": "Konstantinos Galanakis",
+            "email": "konstantinos.g@onthegosystems.com"
+        }
+    ],
+    "autoload": {
+      "psr-4": {
+        "Toolset\\DynamicSources\\": "server/"
+      }
+    },
+    "require": {
+      "rdlowrey/auryn": "^1.4"
+    }
+}

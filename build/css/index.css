@@ -1,0 +1,53 @@
+#toolset-blocks-post-selector {
+  margin: 0 5px;
+  display: flex;
+  align-items: center; }
+  #toolset-blocks-post-selector label {
+    margin: 0 10px 0 0; }
+  #toolset-blocks-post-selector .toolset-blocks-post-selector-control .components-base-control__field {
+    margin: 0; }
+  #toolset-blocks-post-selector .spinner-control {
+    display: inline-block;
+    margin-top: 5px; }
+  #toolset-blocks-post-selector .editor-post-view {
+    margin-left: 10px;
+    margin-right: 10px; }
+    #toolset-blocks-post-selector .editor-post-view small {
+      display: block;
+      margin-bottom: -8px;
+      line-height: 1.3; }
+
+.wp-block-toolset-blocks-wrapper .empty-dynamic-source-content-notice {
+  color: #dedede;
+  font-style: italic;
+  min-height: 60px;
+  display: flex;
+  align-items: center; }
+
+.is-selected .wp-block-toolset-blocks-wrapper.dynamic {
+  border: 1px solid #F15D30; }
+  .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb {
+    left: unset;
+    top: -17px;
+    right: -1px;
+    z-index: 100000; }
+    .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar {
+      color: #f4f4f4;
+      background: #F15D30;
+      padding: 0 2px; }
+      .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar .breadcrumb-label {
+        vertical-align: middle;
+        line-height: 18px; }
+      .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar .components-spinner {
+        background-color: #f4f4f4;
+        margin: 0 5px 0 0; }
+        .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar .components-spinner::before {
+          background-color: #F15D30; }
+  .is-selected .wp-block-toolset-blocks-wrapper.dynamic .tb-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(244, 244, 244, 0.7); }
+

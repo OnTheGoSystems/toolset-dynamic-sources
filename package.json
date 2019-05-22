@@ -1,0 +1,31 @@
+{
+  "name": "toolset-dynamic-sources",
+  "version": "0.9.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "wp-scripts start",
+    "build": "wp-scripts build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@git.onthegosystems.com:10022/toolset/dynamic-sources.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/preset-react": "^7.0.0",
+    "@wordpress/scripts": "^3.2.1",
+    "css-loader": "^2.1.1",
+    "eslint": "^5.16.0",
+    "eslint-config-wordpress": "^2.0.0",
+    "eslint-loader": "^2.1.2",
+    "eslint-plugin-jest": "^22.5.1",
+    "mini-css-extract-plugin": "^0.6.0",
+    "node-sass": "^4.12.0",
+    "postcss-loader": "^3.0.0",
+    "react-select": "^2.4.3",
+    "sass-loader": "^7.1.0"
+  }
+}

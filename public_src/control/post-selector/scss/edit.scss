@@ -1,0 +1,29 @@
+#toolset-blocks-post-selector {
+	margin: 0 5px;
+	display: flex;
+	align-items: center;
+	label {
+		margin: 0 10px 0 0;
+	}
+
+	.toolset-blocks-post-selector-control {
+		.components-base-control__field {
+			margin: 0;
+		}
+	}
+
+	.spinner-control {
+		display: inline-block;
+		margin-top: 5px;
+	}
+
+	.editor-post-view {
+		margin-left: 10px;
+		margin-right: 10px;
+		small {
+			display: block;
+			margin-bottom: -8px;
+			line-height: 1.3;
+		}
+	}
+}
