@@ -1,6 +1,8 @@
 {
     "name": "toolset/dynamic-sources",
     "description": "Toolset Dynamic Sources API for blocks",
+    "keywords": ["dynamic sources", "gutenberg blocks", "wordpress"],
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "Konstantinos Galanakis",
