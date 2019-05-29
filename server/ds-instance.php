@@ -1,5 +1,5 @@
 <?php
-$DS_VERSION = 90000;
+$DS_VERSION = 100000;
 
 if ( ! function_exists( 'ts_dynamic_sources_adjust_ds_instance' ) ) {
 	/**

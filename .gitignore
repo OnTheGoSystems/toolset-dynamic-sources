@@ -1,4 +1,2 @@
-*.map
-
-/vendor/
 /node_modules/
+/vendor/
