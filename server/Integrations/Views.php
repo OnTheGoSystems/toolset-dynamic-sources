@@ -26,21 +26,70 @@ class Views {
 	 * Class initialization
 	 */
 	public function initialize() {
-		add_filter( 'toolset/dynamic_sources/filters/collect_dynamic_sources_data', array( $this, 'integrate_views_info_for_dynamic_sources' ) );
+		add_filter( 'toolset/dynamic_sources/filters/get_dynamic_sources_data', array( $this, 'integrate_views_info_for_dynamic_sources' ) );
 
 		add_action( 'rest_api_init', array( $this, 'register_content_template_preview_post' ) );
 
-		add_action( 'toolset/dynamic_sources/filters/post_type_for_source_context', array( $this, 'adjust_post_types_for_source_context' ), 10, 2 );
+		add_action( 'toolset/dynamic_sources/filters/post_type_for_source_context', array( $this, 'adjust_post_types_for_source_context_in_cts' ), 10, 2 );
+
+		add_action( 'toolset/dynamic_sources/filters/post_type_for_source_context', array( $this, 'adjust_post_types_for_source_context_in_view' ), 10, 2 );
 
 		add_filter( 'toolset/dynamic_sources/filters/shortcode_post', array( $this, 'is_ct_with_post_content_source' ), 10, 4 );
 	}
 
-	public function adjust_post_types_for_source_context( $post_type, $post_id ) {
+	public function adjust_post_types_for_source_context_in_cts( $post_type, $post_id ) {
 		if ( $this->content_template_post_type === $post_type ) {
 			$post_type = $this->get_assigned_single_post_types( $post_id );
 		}
 
 		return $post_type;
+	}
+
+	public function adjust_post_types_for_source_context_in_view( $post_type, $post_id ) {
+		if ( is_admin() || ! $post_id ) {
+			return $post_type;
+		}
+
+		$view_block_name = 'toolset-views/view-editor';
+
+		$post = get_post( $post_id );
+
+		if (
+			! has_blocks( $post->post_content ) ||
+			strpos( $post->post_content, $view_block_name ) < 0
+		) {
+			return $post_type;
+		}
+
+		$view_post_types = array();
+
+		$blocks = parse_blocks( $post->post_content );
+		foreach ( $blocks as $block ) {
+			if ( $view_block_name === $block['blockName'] ) {
+				$view_post_types = array_merge( $view_post_types, $this->maybe_get_view_block_post_types( $block ) );
+			}
+		}
+
+		if ( ! empty( $view_post_types ) ) {
+			if ( ! is_array( $post_type ) ) {
+				$post_type = [ $post_type ];
+			}
+
+			$post_type = array_merge( $post_type, $view_post_types );
+		}
+
+		return $post_type;
+	}
+
+	private function maybe_get_view_block_post_types( $block ) {
+		$view_id = $block['attrs']['viewId'];
+		$view = call_user_func( $this->view_get_instance, $view_id );
+
+		if ( 'posts' !== $view->query_type ) {
+			return [];
+		}
+
+		return $view->view_settings['post_type'];
 	}
 
 	public function register_content_template_preview_post() {

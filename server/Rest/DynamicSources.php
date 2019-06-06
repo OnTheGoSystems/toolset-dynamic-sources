@@ -18,6 +18,11 @@ class DynamicSources {
 					'required' => true,
 					'sanitize_callback' => 'sanitize_text_field',
 				),
+				'preview-post-id' => array(
+					'required' => true,
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+
 			),
 		);
 
@@ -25,11 +30,15 @@ class DynamicSources {
 	}
 
 	public function get_dynamic_sources() {
+		$post_types = sanitize_text_field( $_GET['post-type'] );
+		$preview_post_id = absint( $_GET['preview-post-id'] );
+
+		if ( 0 ===  $preview_post_id || ! $post_types ) {
+			return array();
+		}
+
 		do_action( 'toolset/dynamic_sources/actions/register_sources' );
 
-		return array(
-			'postProviders' => apply_filters( 'toolset/dynamic_sources/filters/get_post_providers_for_select', array() ),
-			'dynamicSources' => apply_filters( 'toolset/dynamic_sources/filters/get_grouped_sources', array() )
-		);
+		return apply_filters( 'toolset/dynamic_sources/filters/get_dynamic_sources_data', [ 'previewPostId' => absint( $_GET['preview-post-id'] ) ] );
 	}
 }

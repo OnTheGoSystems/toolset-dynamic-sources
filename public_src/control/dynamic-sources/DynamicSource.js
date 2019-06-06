@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { ToggleControl, BaseControl } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 import { compose } from '@wordpress/compose';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/lib/Async';
@@ -59,7 +60,7 @@ class DynamicSourceClass extends Component {
 	};
 
 	filterSources = () => {
-		const { dynamicSourcesEligibleAttribute, postType } = this.props;
+		const { dynamicSourcesEligibleAttribute, postType, clientId } = this.props;
 		const getProvider = () => {
 			if ( dynamicSourcesEligibleAttribute.postProviderObject === '__custom_post' ) {
 				if ( !! dynamicSourcesEligibleAttribute.customPostObject ) {
@@ -70,10 +71,19 @@ class DynamicSourceClass extends Component {
 		};
 		const provider = getProvider();
 
+		/*
+		 * Filters the Dynamic Sources offered by the relevant control. It adjust the control offered values for the
+		 * cases when a block that uses Dynamic Sources is inside a View.
+		 *
+		 * @param array  i18n.dynamicSources The current set of Dynamic Sources.
+		 * @param string clientId            The client ID assigned to the block
+		 */
+		const filteredSources = applyFilters( 'tb.dynamicSources.filters.adjustSourcesForBlocksInsideViews', i18n.dynamicSources, clientId );
+
 		// The array (i18n.dynamicSources[ provider ]) needs to be deep cloned because otherwise when it is filtered
 		// for attributes that receive a type of content that doesn't support all the sources, the ommited sources will
 		// never be offered again, no matter the type of content the attribute can receive.
-		const dynamicSources = cloneDeep( i18n.dynamicSources[ provider ] );
+		const dynamicSources = cloneDeep( filteredSources[ provider ] );
 		dynamicSources.forEach(
 			element => {
 				element.options = element.options.filter(
@@ -115,18 +125,26 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicPostProviderSelect = () => {
-		const { dynamicSourcesEligibleAttribute } = this.props;
+		const { dynamicSourcesEligibleAttribute, clientId } = this.props;
 
 		if ( ! dynamicSourcesEligibleAttribute.postProviderObject ) {
 			dynamicSourcesEligibleAttribute.selectPostProviderChangedCallback( this.DEFAULT_POST_PROVIDER );
 		}
 
-		const selectedPostProvider = find( i18n.postProviders, { value: dynamicSourcesEligibleAttribute.postProviderObject } );
+		/*
+		 * Filters the Post providers offered by the relevant control. It adjust the control offered values for the
+		 * cases when a block that uses Dynamic Sources is inside a View.
+		 *
+		 * @param array  i18n.postProviders The current set of Post providers.
+		 * @param string clientId           The client ID assigned to the block
+		 */
+		const filteredPostProviders = applyFilters( 'tb.dynamicSources.filters.adjustProvidersForBlocksInsideViews', i18n.postProviders, clientId );
+		const selectedPostProvider = find( filteredPostProviders, { value: dynamicSourcesEligibleAttribute.postProviderObject } );
 
 		return <Fragment key="post-provider-select">
 			<BaseControl label={ __( 'Post Source', 'toolset-blocks' ) } >
 				<Select
-					options={ i18n.postProviders }
+					options={ filteredPostProviders }
 					styles={ this.customStyles }
 					value={ selectedPostProvider }
 					onChange={
@@ -158,7 +176,13 @@ class DynamicSourceClass extends Component {
 
 			setLoading( clientId, true );
 
-			const previewPostID = previewPost || post;
+			/*
+			 * Filters the preview Post ID for the cases when a block that uses Dynamic Sources is inside a View.
+			 *
+			 * @param array  previewPost The current preview post ( prviewPost || post).
+			 * @param string clientId    The client ID assigned to the block
+			 */
+			const previewPostID = applyFilters( 'tb.dynamicSources.filters.adjustPreviewPostID', previewPost || post, clientId );
 
 			const response = await this.fetchDynamicContent( provider, previewPostID, selectedSource );
 
@@ -209,7 +233,7 @@ class DynamicSourceClass extends Component {
 			const source = dynamicSourcesEligibleAttribute.sourceObject;
 
 			dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( '' );
-			const previewPostID = previewPost || post;
+			const previewPostID = applyFilters( 'tb.dynamicSources.filters.adjustPreviewPostID', previewPost || post, clientId );
 			const response = await this.fetchDynamicContent( provider, previewPostID, source, selectedField );
 			dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( response );
 			setLoading( clientId, false );
@@ -414,10 +438,11 @@ const DynamicSource = compose( [
 	withDispatch(
 		( dispatch ) => {
 			const { createErrorNotice } = dispatch( 'core/notices' );
-			const { setLoading } = dispatch( i18n.dynamicSourcesStore );
+			const { setLoading, setPreviewPost } = dispatch( i18n.dynamicSourcesStore );
 			return {
 				createErrorNotice,
 				setLoading,
+				setPreviewPost,
 			};
 		}
 	),

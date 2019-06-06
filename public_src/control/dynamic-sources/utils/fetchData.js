@@ -7,8 +7,8 @@ import { isEqual } from 'lodash';
 
 const { toolsetDynamicSourcesScriptData: i18n } = window;
 
-const getContentFromCache = ( provider, source, field ) => {
-	const cache = i18n.cache;
+const getContentFromCache = ( provider, post, source, field ) => {
+	const cache = ( !! i18n.cacheForViews && !! i18n.cacheForViews[ post ] ) ? i18n.cacheForViews[ post ] : i18n.cache;
 
 	let content = '';
 
@@ -18,7 +18,8 @@ const getContentFromCache = ( provider, source, field ) => {
 
 	if (
 		'undefined' !== typeof cache[ provider ] &&
-		'undefined' !== typeof cache[ provider ][ source ]
+		'undefined' !== typeof cache[ provider ][ source ] &&
+		post === cache[ provider ][ 'post-id' ]
 	) {
 		content = cache[ provider ][ source ];
 	}
@@ -31,7 +32,7 @@ const getContentFromCache = ( provider, source, field ) => {
 };
 
 const fetchDynamicContent = async( provider, post, source, field = null ) => {
-	const maybeContentIsCached = getContentFromCache( provider, source, field );
+	const maybeContentIsCached = getContentFromCache( provider, post, source, field );
 	if ( maybeContentIsCached ) {
 		return maybeContentIsCached;
 	}

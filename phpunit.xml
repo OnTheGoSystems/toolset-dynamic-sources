@@ -1,0 +1,26 @@
+<phpunit
+	bootstrap="./tests/phpunit/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+>
+	<testsuites>
+		<testsuite name="toolset-dynamic-sources">
+			<directory suffix=".php">./tests/phpunit/tests/</directory>
+		</testsuite>
+	</testsuites>
+	<filter>
+		<whitelist>
+			<directory suffix=".php">./</directory>
+			<exclude>
+				<directory>./build</directory>
+				<directory>./public_src</directory>
+				<directory>./tests</directory>
+				<directory>./vendor</directory>
+				<directory>./node_modules</directory>
+			</exclude>
+		</whitelist>
+	</filter>
+</phpunit>

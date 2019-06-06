@@ -9,12 +9,23 @@
             "email": "konstantinos.g@onthegosystems.com"
         }
     ],
+    "config": {
+      "platform": {
+        "php": "5.6"
+      }
+    },
     "autoload": {
+      "exclude-from-classmap": ["/server/"],
       "psr-4": {
         "Toolset\\DynamicSources\\": "server/"
       }
     },
     "require": {
+      "php": ">=5.6.0",
       "rdlowrey/auryn": "^1.4"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master",
+        "otgs/unit-tests-framework": "~1.2.0"
     }
 }

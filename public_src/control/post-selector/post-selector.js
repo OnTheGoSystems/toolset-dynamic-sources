@@ -27,7 +27,7 @@ class PostSelectorComponentClass extends Component {
 
 	componentDidMount() {
 		addAction(
-			'tb.caching.updated',
+			'tb.dynamicSources.actions.cache.updated',
 			'toolset-blocks',
 			this.updateBlockContentFromCache
 		);

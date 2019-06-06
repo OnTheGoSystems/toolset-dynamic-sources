@@ -17,13 +17,13 @@ When the editor is fully loaded and a block supporting content from dynamic sour
 updated content. Again, if the relevant data exist in the cache, they are instantly returned to the block, while if not
 available a REST API request is made to update the block's content.
 
-At the same time, the block needs to hook an action to the `tb.caching.updated` hook, under the `toolset-blocks` in order
+At the same time, the block needs to hook an action to the `tb.dynamicSources.actions.cache.updated` hook, under the `toolset-blocks` in order
 to be updated each time the polling part of the caching mechanism detects that the cache should be invalidated. The hooking 
 should look like:
 
 ```
 wp.hooks.addAction(
-	'tb.caching.updated',
+	tb.dynamicSources.actions.cache.updated',
 	'toolset-blocks',
 	updateBlockContentFromCache
 );

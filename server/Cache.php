@@ -16,11 +16,19 @@ class Cache {
 	public function add_cached_data( $cache, $post_id ) {
 		global $post;
 
-		$post_id = $post_id ?: $post->ID;
+		$preview_post_id = isset( $_GET['preview-post-id'] ) ? absint( $_GET['preview-post-id'] ) : false;
 
 		if ( ! $post_id ) {
-			return $cache;
+			if ( null !== $post ) {
+				$post_id = $post->ID;
+			} elseif ( $preview_post_id ) {
+				$post_id = $preview_post_id;
+			} else {
+				return $cache;
+			}
 		}
+
+		do_action( 'toolset/dynamic_sources/actions/register_sources' );
 
 		$post_providers = apply_filters( 'toolset/dynamic_sources/filters/get_post_providers', array() );
 		foreach ( $post_providers as $key => $post_provider ) {

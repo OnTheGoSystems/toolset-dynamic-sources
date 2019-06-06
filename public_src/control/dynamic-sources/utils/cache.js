@@ -34,19 +34,38 @@ const initiateCacheFetching = async() => {
 	dispatch( i18n.dynamicSourcesStore ).setCacheUpdating( true );
 	const post = await fetchCache( postID );
 	dispatch( i18n.dynamicSourcesStore ).setCacheUpdating( false );
-	doAction( 'tb.caching.tick', post );
+	doAction( 'tb.dynamicSources.actions.cache.tick', post );
 };
 
 const addCacheUpdateHook = () => {
 	addAction(
-		'tb.caching.tick',
+		'tb.dynamicSources.actions.cache.tick',
 		'toolset-blocks',
 		cache => {
-			if ( ! isEqual( cache, i18n.cache ) ) {
+			let cacheShouldUpdate = false;
+			if ( !! cache && ! isEqual( cache, i18n.cache ) ) {
 				// Post selector cache is updated in another action, so cache can't be assigned but merged
 				i18n.cache = Object.assign( {}, i18n.cache, cache );
-				doAction( 'tb.caching.updated' );
+				cacheShouldUpdate = true;
 			}
+
+			if ( !! i18n.cacheForViews ) {
+				cacheShouldUpdate = true;
+			}
+
+			if ( !! cacheShouldUpdate ) {
+				doAction( 'tb.dynamicSources.actions.cache.updated' );
+			}
+		}
+	);
+};
+
+const addCacheFetchingInitiationHook = () => {
+	addAction(
+		'tb.dynamicSources.actions.cache.initiateFetching',
+		'toolset-blocks',
+		() => {
+			initiateCacheFetching();
 		}
 	);
 };
@@ -54,7 +73,14 @@ const addCacheUpdateHook = () => {
 const initCache = () => {
 	addCacheUpdateHook();
 
-	window.setInterval( initiateCacheFetching, INTERVAL );
+	addCacheFetchingInitiationHook();
+
+	window.setInterval(
+		() => {
+			doAction( 'tb.dynamicSources.actions.cache.initiateFetching' );
+		},
+		INTERVAL
+	);
 };
 
-export { initCache, initiateCacheFetching };
+export { initCache };

@@ -86,6 +86,8 @@ class Main {
 					return $cache;
 				}
 
+				do_action( 'toolset/dynamic_sources/actions/register_sources' );
+
 				$post_providers = apply_filters( 'toolset/dynamic_sources/filters/get_post_providers', array() );
 				foreach ( $post_providers as $post_provider ) {
 					global $post;

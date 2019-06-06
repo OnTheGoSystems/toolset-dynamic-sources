@@ -64,7 +64,9 @@ class MediaFeaturedImageData extends AbstractSource {
 			return '';
 		}
 
-		$value = $attachment->guid;
+		$size = isset( $attributes[ 'size' ] ) ? $attributes[ 'size' ] : 'full';
+
+		$value = wp_get_attachment_image_src( $attachment->ID, $size );
 
 		return wp_kses_post( $value );
 	}

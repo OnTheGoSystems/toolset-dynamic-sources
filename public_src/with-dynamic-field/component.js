@@ -1,7 +1,7 @@
 // WordPress dependencies
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Component, Fragment } from '@wordpress/element';
-import { addAction } from '@wordpress/hooks';
+import { addAction, applyFilters } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
@@ -47,7 +47,7 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 			this.requestUpdateContent();
 
 			addAction(
-				'tb.caching.updated',
+				'tb.dynamicSources.actions.cache.updated',
 				'toolset-blocks',
 				this.requestUpdateContent
 			);
@@ -276,12 +276,12 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 		doUpdateContent() {
 			const {
 				currentPostId,
-				props: { setAttributes },
+				props: { setAttributes, clientId },
 			} = this;
 
 			const { toolsetDynamicSourcesScriptData: i18n } = window;
 
-			const previewPostId = select( i18n.dynamicSourcesStore ).getPreviewPost();
+			const previewPostId = applyFilters( 'tb.dynamicSources.filters.adjustPreviewPostID', select( i18n.dynamicSourcesStore ).getPreviewPost(), clientId );
 			const postId = previewPostId || currentPostId;
 
 			Object.keys( this.fields ).map( async key => {

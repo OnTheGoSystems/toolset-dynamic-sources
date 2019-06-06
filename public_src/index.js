@@ -3,11 +3,17 @@ import { registerDynamicSourceStore } from './control/dynamic-sources/store';
 import PostSelector from './control/post-selector';
 import ViewEditor from './control/view-editor';
 
+const { WPViews } = window;
+
 function initializeDS() {
 	initCache();
 	registerDynamicSourceStore();
-	new PostSelector();
-	new ViewEditor();
+
+	if ( WPViews ) {
+		// Toolset Views is installed.
+		new PostSelector();
+		new ViewEditor();
+	}
 }
 
 initializeDS();

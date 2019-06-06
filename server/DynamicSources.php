@@ -47,6 +47,8 @@ class DynamicSources {
 
 	const CUSTOM_POST_TYPE_REGEXP = '/"(custom_post_type\|[^\|]+\|\d+)"/';
 
+	const SHORTCODE = 'tb-dynamic';
+
 	private $switched_post_data;
 
 	/** @var Source[] */
@@ -88,7 +90,7 @@ class DynamicSources {
 
 		add_shortcode( 'tb-dynamic-container', array( $this, 'dynamic_container_shortcode_render' ) );
 
-		add_shortcode( 'tb-dynamic', array( $this, 'dynamic_shortcode_render' ) );
+		add_shortcode( self::SHORTCODE, array( $this, 'dynamic_shortcode_render' ) );
 
 		add_action( 'init', array( $this, 'initialize_toolset_fields_sources' ) );
 
@@ -114,13 +116,24 @@ class DynamicSources {
 
 		add_filter( 'toolset/dynamic_sources/filters/get_source_content', array( $this, 'get_source_content' ), 10, 5 );
 
+		add_filter( 'toolset/dynamic_sources/filters/get_dynamic_sources_data', array( $this, 'get_dynamic_sources_data' ) );
+
 		add_action( 'enqueue_block_editor_assets', array( $this, 'register_localization_data' ) );
 
+		// Replaces the shortcodes inside HTML attributes for normal posts.
 		add_filter( 'the_content', array( $this, 'shortcode_render' ), -1 );
 
+		// Replaces the shortcodes inside HTML attributes for Views.
+		add_filter( 'wpv-pre-do-shortcode', array( $this, 'shortcode_render' ), -1 );
+
+		// Replaces the shortcodes inside HTML attributes for Content Templates.
 		add_filter( 'wpv_filter_content_template_output', array( $this, 'shortcode_render' ), -1 );
 
 		add_filter( 'toolset/dynamic_sources/filters/register_post_providers', array( $this, 'set_custom_post_provider' ), 10000 );
+
+		if ( defined( 'ICL_SITEPRESS_VERSION' ) ) {
+			$this->dic->make( \Toolset\DynamicSources\Integrations\WPML::class )->initialize();
+		}
 	}
 
 	public function initialize_toolset_fields_sources() {
@@ -410,7 +423,6 @@ class DynamicSources {
 		}
 
 		$content = $source->get_content( $field, $extra_attributes );
-		if ( $post_provider === 'custom_post_type|post|1276' ) error_log(var_export($content, true));
 
 		$this->restore_current_post();
 
@@ -651,9 +663,7 @@ class DynamicSources {
 
 	private function switch_to_post( $post_id ) {
 		// If is already switched, or is the same post, return.
-		if (
-			get_the_ID() === $post_id
-		) {
+		if ( get_the_ID() === $post_id ) {
 			$this->switched_post_data[] = false;
 			return;
 		}
@@ -661,6 +671,7 @@ class DynamicSources {
 		$this->switched_post_data[] = [
 			'switched_id' => $post_id,
 			'original_id' => get_the_ID(), // Note, it can be false if the global isn't set
+			'original_post' => get_post(),
 		];
 
 		global $post;
@@ -687,7 +698,7 @@ class DynamicSources {
 			return;
 		}
 
-		$post = get_post( $data['original_id'] );
+		$post = $data['original_post'];
 
 		setup_postdata( $post );
 	}
@@ -753,15 +764,7 @@ class DynamicSources {
 		wp_enqueue_script( self::TOOLSET_DYNAMIC_SOURCES_SCRIPT_HANDLE, plugins_url( '../build/index.js', __FILE__ ), $block_script_dependencies );
 		wp_enqueue_style( self::TOOLSET_DYNAMIC_SOURCES_STYLE_HANDLE, plugins_url( '../build/css/index.css', __FILE__ ) );
 
-		$dynamic_sources_data = apply_filters(
-			'toolset/dynamic_sources/filters/collect_dynamic_sources_data',
-			array(
-				'postProviders' => apply_filters( 'toolset/dynamic_sources/filters/get_post_providers_for_select', array() ),
-				'dynamicSources' => apply_filters( 'toolset/dynamic_sources/filters/get_grouped_sources', array() ),
-				'dynamicSourcesStore' => \Toolset\DynamicSources\DynamicSources::TOOLSET_BLOCKS_DYNAMIC_SOURCES_STORE,
-				'cache' => apply_filters( 'toolset/dynamic_sources/filters/cache', array(), get_the_ID() ),
-			)
-		);
+		$dynamic_sources_data = apply_filters( 'toolset/dynamic_sources/filters/get_dynamic_sources_data', [] );
 
 		wp_localize_script(
 			self::TOOLSET_DYNAMIC_SOURCES_SCRIPT_HANDLE,
@@ -769,6 +772,19 @@ class DynamicSources {
 			$dynamic_sources_data
 		);
 	}
+
+	public function get_dynamic_sources_data( $dynamic_sources_data )  {
+		return array_merge(
+			$dynamic_sources_data,
+			array(
+				'postProviders' => apply_filters( 'toolset/dynamic_sources/filters/get_post_providers_for_select', array() ),
+				'dynamicSources' => apply_filters( 'toolset/dynamic_sources/filters/get_grouped_sources', array() ),
+				'dynamicSourcesStore' => \Toolset\DynamicSources\DynamicSources::TOOLSET_BLOCKS_DYNAMIC_SOURCES_STORE,
+				'cache' => apply_filters( 'toolset/dynamic_sources/filters/cache', array(), get_the_ID() ),
+			)
+		);
+	}
+
 
 	/**
 	 * Adds a CustomPost provider to the last element

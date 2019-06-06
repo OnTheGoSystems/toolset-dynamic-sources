@@ -34,7 +34,7 @@ const actions = {
 		};
 	},
 	// eslint-disable-next-line
-	getDynamicSources: ( postTypes, randomAttr ) => {
+	getDynamicSources: ( postTypes, previewPostID, randomAttr ) => {
 		// A random value is always passed as an argument to the store's selector in order to always invoke the
 		// relevant resolver. The data package seems to be doing some kind of caching when it comes to resolvers
 		// with argument values that have already been resolved, To bypass this a random argument needs to be fed in,
@@ -42,6 +42,7 @@ const actions = {
 		return {
 			type: 'DYNAMIC_SOURCES_GET',
 			postTypes,
+			previewPostID,
 		};
 	},
 };
@@ -69,7 +70,7 @@ const selectors = {
 		return null;
 	},
 	// eslint-disable-next-line
-	getDynamicSources( state, postTypes, randomAttr ) {
+	getDynamicSources( state, postTypes, previewPostID, randomAttr ) {
 		// A random value is always passed as an argument to the store's selector in order to always invoke the
 		// relevant resolver. The data package seems to be doing some kind of caching when it comes to resolvers
 		// with argument values that have already been resolved, To bypass this a random argument needs to be fed in,
@@ -81,17 +82,17 @@ const selectors = {
 const dynamicSourcesService = new DynamicSourcesService();
 const controls = {
 	DYNAMIC_SOURCES_GET( action ) {
-		return dynamicSourcesService.get( action.postTypes );
+		return dynamicSourcesService.get( action.postTypes, action.previewPostID );
 	},
 };
 
 const resolvers = {
-	* getDynamicSources( postTypes, randomAttr ) {
+	* getDynamicSources( postTypes, previewPostID, randomAttr ) {
 		// A random value is always passed as an argument to the store's selector in order to always invoke the
 		// relevant resolver. The "data" package seems to be doing some kind of caching when it comes to resolvers
 		// with argument values that have already been resolved, To bypass this a random argument needs to be fed in,
 		// to fake an argument set change.
-		const sources = yield actions.getDynamicSources( postTypes, randomAttr );
+		const sources = yield actions.getDynamicSources( postTypes, previewPostID, randomAttr );
 		yield actions.setDynamicSources( sources );
 	},
 };
