@@ -21,7 +21,7 @@ class PostTaxonomies extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Taxonomies', 'toolset-dynamic-sources' );
+		return __( 'Post Taxonomies', 'wpv-views' );
 	}
 
 	/**

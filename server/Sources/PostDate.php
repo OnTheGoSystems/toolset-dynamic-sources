@@ -18,7 +18,7 @@ class PostDate extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Date', 'toolset-dynamic-sources' );
+		return __( 'Post Date', 'wpv-views' );
 	}
 
 	/**

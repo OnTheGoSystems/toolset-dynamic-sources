@@ -1,21 +1,42 @@
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
-const defaultConfig = require('./node_modules/@wordpress/scripts/config/webpack.config');
+const convertToCamelCase = ( str ) => {
+	return str.replace(
+		/\W+(.)/g,
+		function( match, chr ) {
+			return chr.toUpperCase();
+		}
+	);
+};
 
 module.exports = {
-	...defaultConfig,
 	entry: {
-		...defaultConfig.entry,
 		index: path.resolve( process.cwd(), 'public_src', 'index.js' ),
 	},
 	output: {
-		...defaultConfig.output,
+		filename: '[name].js',
+		path: path.resolve( process.cwd(), 'build' ),
 		library: 'ToolsetDynamicSources',
 	},
+	resolve: {
+		alias: {
+			'lodash-es': 'lodash',
+		},
+	},
 	module: {
-		...defaultConfig.module,
 		rules: [
+			// Babel
+			{
+				test: /\.js$/,
+				exclude: /(node_modules)/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: [ '@babel/preset-react' ],
+					},
+				},
+			},
 			{
 				enforce: 'pre',
 				test: /\.js$/,
@@ -25,7 +46,6 @@ module.exports = {
 					emitWarning: true,
 				}
 			},
-			...defaultConfig.module.rules,
 			// Scss
 			{
 				test: /\.scss$/,
@@ -59,8 +79,32 @@ module.exports = {
 			},
 		]
 	},
+	externals: [
+		{
+			react: 'React',
+			'react-dom': 'ReactDOM',
+			jquery: 'jQuery',
+			lodash: 'lodash',
+		},
+		// Define Wordpress libraries as externals
+		// see https://webpack.js.org/configuration/externals/#function
+		function( context, request, callback ) {
+			const wpLibMatches = request.match( /^\@(wp|wordpress)\/(.*)/i );
+			if ( wpLibMatches ) {
+				return callback( null, 'window.wp.' + convertToCamelCase( wpLibMatches[ 2 ] ) );
+			}
+			callback();
+		},
+		// Define Toolset Common Es as externals
+		function( context, request, callback ) {
+			const toolsetMatches = request.match( /^toolset\/(.*)/i );
+			if ( toolsetMatches ) {
+				return callback( null, 'window.toolsetCommonEs.' + toolsetMatches[ 1 ].replace( /\//g, '.' ) );
+			}
+			callback();
+		},
+	],
 	plugins: [
-		...defaultConfig.plugins,
 		new MiniCssExtractPlugin( {
 			filename: 'css/[name].css',
 			chunkFilename: 'css/[name].css',

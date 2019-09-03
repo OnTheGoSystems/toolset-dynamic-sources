@@ -18,7 +18,7 @@ class PostTitleWithLink extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Title with a link', 'toolset-dynamic-sources' );
+		return __( 'Post Title with a link', 'wpv-views' );
 	}
 
 	/**

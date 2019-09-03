@@ -65,4 +65,22 @@ class SourceStorage {
 			return $source->is_usable_with_post_provider( $for_post_provider );
 		} );
 	}
+
+	/**
+	 * Getter for the sources attribute of the SourceStorage.
+	 *
+	 * @return Source[]
+	 */
+	public function get_sources() {
+		return $this->sources;
+	}
+
+	/**
+	 * Getter for the post providers attribute of the SourceStorage.
+	 *
+	 * @return PostProvider[]
+	 */
+	public function get_post_providers() {
+		return $this->post_providers;
+	}
 }

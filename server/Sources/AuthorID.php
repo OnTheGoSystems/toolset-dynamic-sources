@@ -18,7 +18,7 @@ class AuthorID extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Author ID', 'toolset-dynamic-sources' );
+		return __( 'Author ID', 'wpv-views' );
 	}
 
 	/**

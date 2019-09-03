@@ -18,7 +18,7 @@ class SiteTagline extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Site Tagline', 'toolset-dynamic-sources' );
+		return __( 'Site Tagline', 'wpv-views' );
 	}
 
 	/**

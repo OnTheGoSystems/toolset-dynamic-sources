@@ -18,7 +18,7 @@ class PostExcerpt extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Excerpt', 'toolset-dynamic-sources' );
+		return __( 'Post Excerpt', 'wpv-views' );
 	}
 
 	/**

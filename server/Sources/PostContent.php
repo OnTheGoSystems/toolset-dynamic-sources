@@ -18,7 +18,7 @@ class PostContent extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Content (Body)', 'toolset-dynamic-sources' );
+		return __( 'Post Content (Body)', 'wpv-views' );
 	}
 
 	/**
@@ -48,6 +48,22 @@ class PostContent extends AbstractSource {
 	 */
 	public function get_content( $field = null, $attributes = null ) {
 		global $post;
-		return apply_filters( 'the_content', $post->post_content );
+
+		$content = null;
+
+		if ( ! $post->dynamic_sources_content_processed ) {
+			// In order to avoid infinite loops, a property for the post object is set, stating that this post has been
+			// processed during the "Post Content" source rendering.
+			// Before applying the "the_content" filter this property is checked and if the post has been already processed,
+			// the source returns null to prevent an infinite loop.
+			$post->dynamic_sources_content_processed = true;
+			$content = apply_filters( 'the_content', $post->post_content );
+
+			// After the source has returned its content, the property for the post object is set back to false to allow
+			// rendering of the same source by another block.
+			$post->dynamic_sources_content_processed = false;
+		}
+
+		return $content;
 	}
 }

@@ -18,7 +18,7 @@ class MediaFeaturedImageData extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Featured Image Data', 'toolset-dynamic-sources' );
+		return __( 'Featured Image Data', 'wpv-views' );
 	}
 
 	/**

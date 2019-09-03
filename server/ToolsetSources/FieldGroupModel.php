@@ -71,5 +71,4 @@ class FieldGroupModel {
 
 		return null;
 	}
-
 }

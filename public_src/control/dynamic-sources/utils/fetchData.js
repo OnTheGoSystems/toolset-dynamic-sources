@@ -54,7 +54,7 @@ const fetchDynamicContent = async( provider, post, source, field = null ) => {
 	} catch ( error ) {
 		const errorMessage = sprintf(
 			// translators: placeholder is an error message.
-			__( 'Something went wrong while fetching the dynamic content from the selected source, with message: "%s".', 'toolset-blocks' ),
+			__( 'Something went wrong while fetching the dynamic content from the selected source, with message: "%s".', 'wpv-views' ),
 			error.message
 		);
 
@@ -73,7 +73,7 @@ const fetchCache = async( postID ) => {
 	} catch ( error ) {
 		const errorMessage = sprintf(
 			// translators: placeholder is an error message.
-			__( 'Something went wrong while trying to update the sources cache, with message: "%s". Please reload the page and try again.', 'toolset-blocks' ),
+			__( 'Something went wrong while trying to update the sources cache, with message: "%s". Please reload the page and try again.', 'wpv-views' ),
 			error.message
 		);
 

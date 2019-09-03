@@ -61,7 +61,7 @@ class CustomPost implements PostProvider {
 		if ( $this->post_id ) {
 			return get_the_title( $this->post_id );
 		}
-		return __( 'Other post', 'toolset-dynamic-sources' );
+		return __( 'Other post', 'wpv-views' );
 	}
 
 	/**

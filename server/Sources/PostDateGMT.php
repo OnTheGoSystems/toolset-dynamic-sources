@@ -18,7 +18,7 @@ class PostDateGMT extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Date GMT', 'toolset-dynamic-sources' );
+		return __( 'Post Date GMT', 'wpv-views' );
 	}
 
 	/**

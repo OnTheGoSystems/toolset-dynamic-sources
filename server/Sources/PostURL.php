@@ -18,7 +18,7 @@ class PostURL extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post URL', 'toolset-dynamic-sources' );
+		return __( 'Post URL', 'wpv-views' );
 	}
 
 	/**

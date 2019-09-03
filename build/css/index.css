@@ -24,30 +24,12 @@
   display: flex;
   align-items: center; }
 
-.is-selected .wp-block-toolset-blocks-wrapper.dynamic {
-  border: 1px solid #F15D30; }
-  .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb {
-    left: unset;
-    top: -17px;
-    right: -1px;
-    z-index: 100000; }
-    .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar {
-      color: #f4f4f4;
-      background: #F15D30;
-      padding: 0 2px; }
-      .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar .breadcrumb-label {
-        vertical-align: middle;
-        line-height: 18px; }
-      .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar .components-spinner {
-        background-color: #f4f4f4;
-        margin: 0 5px 0 0; }
-        .is-selected .wp-block-toolset-blocks-wrapper.dynamic .editor-block-list__breadcrumb .components-toolbar .components-spinner::before {
-          background-color: #F15D30; }
-  .is-selected .wp-block-toolset-blocks-wrapper.dynamic .tb-overlay {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: rgba(244, 244, 244, 0.7); }
+.is-selected .wp-block-toolset-blocks-wrapper.dynamic .tb-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(244, 244, 244, 0.7);
+  min-height: initial; }
 

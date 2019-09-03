@@ -18,7 +18,7 @@ class PostID extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post ID', 'toolset-dynamic-sources' );
+		return __( 'Post ID', 'wpv-views' );
 	}
 
 	/**

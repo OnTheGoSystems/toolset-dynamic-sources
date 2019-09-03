@@ -69,6 +69,8 @@ class DynamicSources {
 	/** @var DicLoader */
 	private $dic;
 
+	private $registered_dynamic_sources_repo = array();
+
 	public static $toolset_dynamic_sources_version;
 
 	public function __construct() {
@@ -94,11 +96,13 @@ class DynamicSources {
 
 		add_action( 'init', array( $this, 'initialize_toolset_fields_sources' ) );
 
+		// The Views integration needs to be initialized before (priority < 10) the initialization of the sources, because "initialize_sources"
+		// includes a filter added in the Views integration code.
+		add_action( 'init', array( $this, 'initialize_views_integration' ), 9 );
+
 		add_action( 'init', array( $this, 'initialize_sources' ) );
 
 		add_action( 'init', array( $this, 'initialize_other_fields_sources' ) );
-
-		add_action( 'init', array( $this, 'initialize_views_integration' ) );
 
 		add_action( 'rest_api_init', array( $this, 'initialize_rest' ) );
 
@@ -178,7 +182,6 @@ class DynamicSources {
 	}
 
 	public function initialize_sources() {
-		// Add Dynamic Sources for registration.
 		$post_sources = array(
 			'PostTitle',
 			'PostTitleWithLink',
@@ -202,31 +205,23 @@ class DynamicSources {
 			'MediaFeaturedImageData',
 		);
 
-		// Do not offer the PostContent source outside of Content Templates
-		global $pagenow;
-		if ( 'post.php' === $pagenow ) {
-			$edited_post = isset( $_GET['post'] ) ? (int) $_GET['post'] : 0;
-			if ( 'view-template' !== get_post_type( $edited_post ) ) {
-				$post_sources = array_filter(
-					$post_sources,
-					function( $source ) {
-						return ( 'PostContent' !== $source );
-					}
-				);
-			}
-		}
-		if ( 'post-new.php' === $pagenow ) {
-			$post_sources = array_filter(
-				$post_sources,
-				function( $source ) {
-					return ( 'PostContent' !== $source );
-				}
-			);
-		}
+		/**
+		 * Filters the set of "Post" dynamic sources.
+		 *
+		 * @param array $post_sources
+		 */
+		$post_sources = apply_filters( 'toolset/dynamic_sources/filters/post_sources', $post_sources );
 
 		$other_sources = array(
 			'SiteTagline',
 		);
+
+		/**
+		 * Filters the set of "Other" dynamic sources.
+		 *
+		 * @param array $other_sources
+		 */
+		$other_sources = apply_filters( 'toolset/dynamic_sources/filters/other_sources', $other_sources );
 
 		foreach ( array_merge( $post_sources, $other_sources ) as $source ) {
 			$sourceClass = '\Toolset\DynamicSources\Sources\\' . $source;
@@ -291,6 +286,11 @@ class DynamicSources {
 			$post_type = array();
 		}
 
+		// If the Dynamic Sources are already registered for this post type, then load the registered data.
+		if ( $this->maybe_fetch_cached_dynamic_sources_for_post_type( $post_type ) ) {
+			return;
+		}
+
 		// Get the initial context, in which everything happens.
 		$this->source_context = $this->build_source_context( $post_type );
 
@@ -303,6 +303,48 @@ class DynamicSources {
 
 		// Register data sources that can be used with available post providers.
 		$this->register_data_sources( $this->post_providers );
+
+		// A set of Dynamic Sources were registered for a new post type, so let's cache those values for future use.
+		$this->cache_dynamic_sources_for_post_type( $post_type );
+	}
+
+	/**
+	 * Retrieves from cache the registered Dynamic Sources for a given post type.
+	 *
+	 * @param $post_type
+	 *
+	 * @return bool
+	 */
+	private function maybe_fetch_cached_dynamic_sources_for_post_type( $post_type ) {
+		if ( is_array( $post_type ) ) {
+			$post_type = implode( '_', $post_type );
+		}
+
+		if ( isset( $this->registered_dynamic_sources_repo[ $post_type ] ) ) {
+			$this->source_context = $this->registered_dynamic_sources_repo[ $post_type ]['source_context'];
+			$this->source_storage = $this->registered_dynamic_sources_repo[ $post_type ]['source_storage'];
+			$this->post_providers = $this->registered_dynamic_sources_repo[ $post_type ]['source_storage']->get_post_providers();
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Caches the registered Dynamic Sources for a given post type.
+	 *
+	 * @param $post_type
+	 */
+	private function cache_dynamic_sources_for_post_type( $post_type ) {
+		if ( is_array( $post_type ) ) {
+			$post_type = implode( '_', $post_type );
+		}
+
+		$this->registered_dynamic_sources_repo[ $post_type ] = array(
+			'source_context' => $this->source_context,
+			'source_storage' => $this->source_storage,
+		);
 	}
 
 
@@ -411,6 +453,10 @@ class DynamicSources {
 		) {
 			$post = $this->post_providers[ $post_provider ]->get_post( $post );
 		} else {
+			return '';
+		}
+
+		if ( ! $post ) {
 			return '';
 		}
 
@@ -543,12 +589,12 @@ class DynamicSources {
 
 	private function get_groups() {
 		$groups = array(
-			self::POST_GROUP => __( 'Post', 'toolset-dynamic-sources' ),
-			self::AUTHOR_GROUP => __( 'Author', 'toolset-dynamic-sources' ),
-			self::SITE_GROUP => __( 'Site', 'toolset-dynamic-sources' ),
-			self::MEDIA_GROUP => __( 'Media', 'toolset-dynamic-sources' ),
-			self::COMMENTS_GROUP => __( 'Comments', 'toolset-dynamic-sources' ),
-			self::OTHER_GROUP => __( 'Other', 'toolset-dynamic-sources' ),
+			self::POST_GROUP => __( 'Post', 'wpv-views' ),
+			self::AUTHOR_GROUP => __( 'Author', 'wpv-views' ),
+			self::SITE_GROUP => __( 'Site', 'wpv-views' ),
+			self::MEDIA_GROUP => __( 'Media', 'wpv-views' ),
+			self::COMMENTS_GROUP => __( 'Comments', 'wpv-views' ),
+			self::OTHER_GROUP => __( 'Other', 'wpv-views' ),
 		);
 
 		/**
@@ -562,6 +608,10 @@ class DynamicSources {
 	}
 
 	public function dynamic_container_shortcode_render( $attributes, $content ) {
+		if ( $this->maybe_prevent_shortcode_rendering() ) {
+			return '';
+		}
+
 		$atts = shortcode_atts(
 			array(
 				'provider' => '',
@@ -607,6 +657,10 @@ class DynamicSources {
 	}
 
 	public function dynamic_shortcode_render( $attributes ) {
+		if ( $this->maybe_prevent_shortcode_rendering() ) {
+			return '';
+		}
+
 		return $this->get_shortcode_content( $attributes );
 	}
 
@@ -622,10 +676,6 @@ class DynamicSources {
 			$attributes
 		);
 
-		if ( ! did_action( 'toolset/dynamic_sources/actions/register_sources' ) ) {
-			do_action( 'toolset/dynamic_sources/actions/register_sources' );
-		}
-
 		$post_provider = sanitize_text_field( $atts['provider'] );
 		$post = sanitize_text_field( $atts['post'] );
 		$source = sanitize_text_field( $atts[ 'source' ] );
@@ -633,7 +683,21 @@ class DynamicSources {
 
 		if ( 'current' === $post ) {
 			$post = get_the_ID();
+		} else {
+			$post = intval( $post );
 		}
+
+		/**
+		 * Registers the Dynamic Sources if needed.
+		 */
+		do_action( 'toolset/dynamic_sources/actions/register_sources' );
+
+		/**
+		 * Filters the post provider
+		 *
+		 * @param string $post_provider e.g. `custom_post_type|post|65`
+		 */
+		$post_provider = apply_filters( 'toolset/dynamic_sources/filters/shortcode_post_provider', $post_provider );
 
 		$post = apply_filters( 'toolset/dynamic_sources/filters/shortcode_post', $post, $post_provider, $source, $field );
 
@@ -649,7 +713,6 @@ class DynamicSources {
 		}
 		return $output;
 	}
-
 
 	private function register_source( Sources\Source $source ) {
 		$this->source_storage->add_source( $source );
@@ -773,7 +836,7 @@ class DynamicSources {
 		);
 	}
 
-	public function get_dynamic_sources_data( $dynamic_sources_data )  {
+	public function get_dynamic_sources_data( $dynamic_sources_data ) {
 		return array_merge(
 			$dynamic_sources_data,
 			array(
@@ -830,5 +893,32 @@ class DynamicSources {
 				$this->post_providers[ $custom_post_provider->get_unique_slug() ] = $custom_post_provider;
 			}
 		}
+	}
+
+	/**
+	 * Decides whether to prevent the dynamic shortcodes rendering for certain requests.
+	 *
+	 * @return bool
+	 */
+	private function maybe_prevent_shortcode_rendering() {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			// Targeting the "http://my-server.test/wp-json/wp/v2/pages?per_page=100&exclude=2&parent_exclude=2&orderby=menu_order&order=asc&context=edit&_locale=user"
+			// REST API requesting happening on the new post page for hierarchical post types, that is used to populate the
+			// "Parent Post/Page" dropdown.
+			// Can be removed once https://github.com/WordPress/gutenberg/issues/17160 (duplicates https://github.com/WordPress/gutenberg/issues/13618)
+			// is resolved.
+			if (
+				boolval( sanitize_text_field( toolset_getget( 'per_page', false ) ) ) &&
+				boolval( sanitize_text_field( toolset_getget( 'exclude', false ) ) ) &&
+				boolval( sanitize_text_field( toolset_getget( 'parent_exclude', false ) ) ) &&
+				boolval( sanitize_text_field( toolset_getget( 'orderby', false ) ) ) &&
+				boolval( sanitize_text_field( toolset_getget( 'order', false ) ) ) &&
+				boolval( sanitize_text_field( toolset_getget( 'context', false ) ) )
+			) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

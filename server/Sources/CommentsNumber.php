@@ -18,7 +18,7 @@ class CommentsNumber extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Comments Number', 'toolset-dynamic-sources' );
+		return __( 'Comments Number', 'wpv-views' );
 	}
 
 	/**

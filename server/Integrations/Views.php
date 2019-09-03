@@ -35,6 +35,8 @@ class Views {
 		add_action( 'toolset/dynamic_sources/filters/post_type_for_source_context', array( $this, 'adjust_post_types_for_source_context_in_view' ), 10, 2 );
 
 		add_filter( 'toolset/dynamic_sources/filters/shortcode_post', array( $this, 'is_ct_with_post_content_source' ), 10, 4 );
+
+		add_filter( 'toolset/dynamic_sources/filters/post_sources', array( $this, 'maybe_exclude_post_content_source_from_post_sources' ) );
 	}
 
 	public function adjust_post_types_for_source_context_in_cts( $post_type, $post_id ) {
@@ -82,7 +84,16 @@ class Views {
 	}
 
 	private function maybe_get_view_block_post_types( $block ) {
-		$view_id = $block['attrs']['viewId'];
+		$view_id = toolset_getnest(
+			$block,
+			array( 'attrs', 'viewId' ),
+			toolset_getnest( $block, array( 'attrs', 'view', 'ID' ), false )
+		);
+
+		if ( ! $view_id ) {
+			return [];
+		}
+
 		$view = call_user_func( $this->view_get_instance, $view_id );
 
 		if ( 'posts' !== $view->query_type ) {
@@ -335,5 +346,41 @@ class Views {
 		}
 
 		return $post;
+	}
+
+	/**
+	 * Filters the Post Sources by excluding the PostContent sources when not needed.
+	 *
+	 * @param array $post_sources The Post Sources.
+	 *
+	 * @return array The filtered Post Sources.
+	 */
+	public function maybe_exclude_post_content_source_from_post_sources( $post_sources ) {
+		// Do not offer the PostContent source outside of Content Templates or in new post pages.
+		global $pagenow;
+		$post = (int) toolset_getget( 'post', 0 );
+		$should_exclude_post_content_source = false;
+
+		switch ( $pagenow ) {
+			case 'post.php':
+				if ( get_post_type( $post ) !== $this->content_template_post_type ) {
+					$should_exclude_post_content_source = true;
+				}
+				break;
+			case 'post-new.php':
+				$should_exclude_post_content_source = true;
+				break;
+		}
+
+		if ( $should_exclude_post_content_source ) {
+			$post_sources = array_filter(
+				$post_sources,
+				function( $source ) {
+					return ( 'PostContent' !== $source );
+				}
+			);
+		}
+
+		return $post_sources;
 	}
 }

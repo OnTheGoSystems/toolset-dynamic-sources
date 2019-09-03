@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, Component } from '@wordpress/element';
-import { Toolbar, Spinner } from '@wordpress/components';
+import { Toolbar, Spinner, Tooltip } from '@wordpress/components';
 import { withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -8,6 +8,7 @@ const { toolsetDynamicSourcesScriptData: i18n } = window;
 
 // Internal Dependencies
 import './scss/edit.scss';
+import EditTooltip from './EditTooltip';
 
 class EditWrapperClass extends Component {
 	maybeRenderLoadingSpinner = () => {
@@ -18,12 +19,20 @@ class EditWrapperClass extends Component {
 		return spinner;
 	};
 
+	renderOverlayWithSpiner = () => {
+		return (
+			<div className="tb-overlay wp-block-embed is-loading" key="tb-overlay">
+				<Spinner />
+			</div>
+		);
+	};
+
 	renderEditWrapperContent = () => {
 		const { children } = this.props;
-
 		const editWrapper = [ children ];
+
 		if ( this.props.loading ) {
-			editWrapper.push( <div className="tb-overlay" key="tb-overlay" /> );
+			editWrapper.push( this.renderOverlayWithSpiner() );
 		}
 
 		return (
@@ -48,24 +57,38 @@ class EditWrapperClass extends Component {
 				<Toolbar>
 					<Fragment>
 						{ this.maybeRenderLoadingSpinner() }
-						<span className="breadcrumb-label">{ __( 'Dynamic Content', 'toolset-blocks' ) }</span>
+						<span className="breadcrumb-label">{ __( 'Dynamic Content', 'wpv-views' ) }</span>
 					</Fragment>
 				</Toolbar>
 			</div>
 		);
 	};
 
-	render() {
+	renderEditWrapper = () => {
 		const { hasDynamicSource } = this.props;
 
 		const className = 'wp-block-toolset-blocks-wrapper';
 
 		return (
 			<div className={ hasDynamicSource ? `${ className } dynamic` : className }>
-				{ this.renderDynamicContentBreadcrumb() }
 				{ this.renderEditWrapperContent() }
 			</div>
 		);
+	};
+
+	render() {
+		const { hasDynamicSource, disableTooltip = false } = this.props;
+		let editWrapper = this.renderEditWrapper();
+
+		if ( hasDynamicSource && ! disableTooltip ) {
+			editWrapper = (
+				<Tooltip text={ <EditTooltip /> }>
+					{ editWrapper }
+				</Tooltip>
+			);
+		}
+
+		return editWrapper;
 	}
 }
 const EditWrapper = compose( [

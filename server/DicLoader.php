@@ -2,7 +2,6 @@
 
 namespace Toolset\DynamicSources;
 
-use Auryn\Injector;
 
 /**
  * Dependency Injection Wrapper
@@ -28,7 +27,17 @@ class DicLoader {
 	 * DicLoader constructor.
 	 */
 	private function __construct() {
-		$this->dic = new Injector();
+		$this->dic = apply_filters( 'toolset_dic', false );
+
+		if( $this->dic === false && class_exists( '\Auryn\Injector' ) ) {
+			// DS used outside of Toolset.
+			$this->dic = new \Auryn\Injector();
+		}
+
+		if( $this->dic === false ) {
+			// No Toolset and Auryn could not be found. (Composer autoload not used.)
+			throw new \Exception( 'Dynamic Sources: Auryn could not be loaded.' );
+		}
 	}
 
 	/**

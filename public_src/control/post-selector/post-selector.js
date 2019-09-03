@@ -74,11 +74,11 @@ class PostSelectorComponentClass extends Component {
 				rel="noopener noreferrer"
 				href={ this.makePreviewUrl() }
 			>
-				{ __( 'View on front-end', 'toolset-blocks' ) }
+				{ __( 'View on front-end', 'wpv-views' ) }
 			</a>
 			{ !! this.props.hasChangedContent &&
 			<small>
-				{ __( '(Click Update button first to view the recent changes)', 'toolset-blocks' ) }
+				{ __( '(Click Update button first to view the recent changes)', 'wpv-views' ) }
 			</small>
 			}
 		</span>;
@@ -117,7 +117,7 @@ class PostSelectorComponentClass extends Component {
 
 		return (
 			<Fragment>
-				<label htmlFor={ `post-selector-${ this.props.instanceId }` }>{ __( 'View with: ', 'toolset-blocks' ) }</label>
+				<label htmlFor={ `post-selector-${ this.props.instanceId }` }>{ __( 'View with', 'wpv-views' ) }: </label>
 				<Select
 					id={ `post-selector-${ this.props.instanceId }` }
 					value={ this.state.selectedPost }

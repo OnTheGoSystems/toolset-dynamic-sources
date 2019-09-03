@@ -72,6 +72,6 @@ class Main {
 	 * @return string
 	 */
 	public function get_group() {
-		return [ self::GROUP_KEY => __( 'Other custom fields', 'toolset-dynamic-sources' ) ];
+		return [ self::GROUP_KEY => __( 'Other custom fields', 'wpv-views' ) ];
 	}
 }

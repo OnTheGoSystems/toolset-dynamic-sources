@@ -39,7 +39,7 @@ class IdentityPost implements PostProvider {
 	 * @return string
 	 */
 	public function get_label() {
-		return __( 'Current post', 'toolset-dynamic-sources' );
+		return __( 'Current post', 'wpv-views' );
 	}
 
 

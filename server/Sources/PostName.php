@@ -18,7 +18,7 @@ class PostName extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Slug', 'toolset-dynamic-sources' );
+		return __( 'Post Slug', 'wpv-views' );
 	}
 
 	/**

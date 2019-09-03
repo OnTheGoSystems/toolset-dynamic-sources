@@ -66,7 +66,7 @@ class RelatedPostProvider implements PostProvider {
 	 */
 	public function get_label() {
 		return sprintf(
-			__( '%s in the %s relationship', 'toolset-dynamic-sources' ),
+			__( '%s in the %s relationship', 'wpv-views' ),
 			$this->role->get_label(),
 			$this->relationship->get_display_name()
 		);

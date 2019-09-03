@@ -1,12 +1,12 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { ToggleControl, BaseControl } from '@wordpress/components';
+import { ToggleControl, BaseControl, Notice } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { applyFilters } from '@wordpress/hooks';
+import { applyFilters, doAction, addAction } from '@wordpress/hooks';
 import { compose } from '@wordpress/compose';
 import Select from 'react-select';
 import AsyncSelect from 'react-select/lib/Async';
-import { has, isEmpty, cloneDeep, find, filter, includes } from 'lodash';
+import { has, isEmpty, cloneDeep, find, filter, includes, get, isUndefined } from 'lodash';
 
 import { fetchDynamicContent, searchPost, loadSourceFromCustomPost } from './utils/fetchData';
 const { toolsetDynamicSourcesScriptData: i18n } = window;
@@ -20,6 +20,64 @@ class DynamicSourceClass extends Component {
 		super( props );
 
 		this.DEFAULT_POST_PROVIDER = i18n.postProviders[ 0 ].value; // Current post.
+
+		this.state = {
+			infoMessageQueue: {},
+		};
+
+		addAction(
+			'tb.dynamicSources.actions.field.changed',
+			'toolset-blocks',
+			value => {
+				const newInfoMessageQueue = this.state.infoMessageQueue;
+				if ( value && 'rfg' === value.type ) {
+					newInfoMessageQueue.rfg = (
+						<Fragment>
+							<p
+								dangerouslySetInnerHTML={
+									{
+										__html: sprintf(
+											__( '%1$s is a Repeating Field Group. If you want to display its fields here, put another View block into this Loop item and choose %1$s in the Content Selection step of the View wizard.', 'wpv-views' ),
+											`<strong>${ value.label }</strong>`
+										),
+									}
+								}
+							/>
+						</Fragment>
+					);
+				} else {
+					delete newInfoMessageQueue.rfg;
+				}
+
+				this.setState( { infoMessageQueue: newInfoMessageQueue } );
+			}
+		);
+
+		addAction(
+			'tb.dynamicSources.actions.dynamicSourceComponentDidMount',
+			'toolset-blocks',
+			( clientId ) => {
+				// This action callback should be triggered only for the block that has just mounted the component.
+				if ( clientId !== this.props.clientId ) {
+					return;
+				}
+
+				const { dynamicSourcesEligibleAttribute } = this.props;
+				const selectedSource = find( this.ungroupedSources, { value: dynamicSourcesEligibleAttribute.sourceObject } ) || null;
+				if ( selectedSource ) {
+					doAction( 'tb.dynamicSources.actions.source.changed', selectedSource );
+
+					const selectedField = selectedSource.fields.length > 0 ? find( selectedSource.fields, { value: dynamicSourcesEligibleAttribute.fieldObject } ) : null;
+					if ( selectedField ) {
+						doAction( 'tb.dynamicSources.actions.field.changed', selectedField );
+					}
+				}
+			}
+		);
+	}
+
+	componentDidMount() {
+		doAction( 'tb.dynamicSources.actions.dynamicSourceComponentDidMount', this.props.clientId );
 	}
 
 	/**
@@ -60,7 +118,7 @@ class DynamicSourceClass extends Component {
 	};
 
 	filterSources = () => {
-		const { dynamicSourcesEligibleAttribute, postType, clientId } = this.props;
+		const { dynamicSourcesEligibleAttribute, postType, clientId, componentId } = this.props;
 		const getProvider = () => {
 			if ( dynamicSourcesEligibleAttribute.postProviderObject === '__custom_post' ) {
 				if ( !! dynamicSourcesEligibleAttribute.customPostObject ) {
@@ -78,7 +136,18 @@ class DynamicSourceClass extends Component {
 		 * @param array  i18n.dynamicSources The current set of Dynamic Sources.
 		 * @param string clientId            The client ID assigned to the block
 		 */
-		const filteredSources = applyFilters( 'tb.dynamicSources.filters.adjustSourcesForBlocksInsideViews', i18n.dynamicSources, clientId );
+		const viewsFilteredSources = applyFilters( 'tb.dynamicSources.filters.adjustSourcesForBlocksInsideViews', i18n.dynamicSources, clientId );
+
+		/*
+		 * A block can have indepent DynamicSources like in Conditional Blocks
+		 * Filter using the `componentId` is needed
+		 *
+		 * @param array  i18n.dynamicSources The current set of Dynamic Sources.
+		 * @param string componentId         The ID of the <DynamicSource> component
+		 */
+		const filteredSources = componentId ?
+			applyFilters( 'tb.dynamicSources.filters.adjustSourcesForBlocks', viewsFilteredSources, componentId ) :
+			viewsFilteredSources;
 
 		// The array (i18n.dynamicSources[ provider ]) needs to be deep cloned because otherwise when it is filtered
 		// for attributes that receive a type of content that doesn't support all the sources, the ommited sources will
@@ -99,9 +168,18 @@ class DynamicSourceClass extends Component {
 							}
 							return true;
 						};
-						if ( option.value === 'post-content' && postType !== 'view-template' ) {
+
+						const maybeViewBLock = applyFilters( 'toolsetViews.filters.getParentViewBlock', null, this.props.clientId );
+						const blockTypes = applyFilters( 'toolsetViews.filters.getViewEditorBlockTypes', null );
+						if (
+							option.value === 'post-content' &&
+							postType !== 'view-template' &&
+							! isUndefined( blockTypes.BLOCK_ID_EDITOR ) &&
+							blockTypes.BLOCK_ID_EDITOR !== get( maybeViewBLock, 'name', null )
+						) {
 							return false;
 						}
+
 						this.ungroupedSources.push( option );
 						if ( has( option, 'fields' ) && ! isEmpty( option.fields ) ) {
 							const fieldsOfCategory = find( option.fields, ( field ) => {
@@ -125,7 +203,7 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicPostProviderSelect = () => {
-		const { dynamicSourcesEligibleAttribute, clientId } = this.props;
+		const { dynamicSourcesEligibleAttribute, clientId, hideLabels } = this.props;
 
 		if ( ! dynamicSourcesEligibleAttribute.postProviderObject ) {
 			dynamicSourcesEligibleAttribute.selectPostProviderChangedCallback( this.DEFAULT_POST_PROVIDER );
@@ -140,12 +218,14 @@ class DynamicSourceClass extends Component {
 		 */
 		const filteredPostProviders = applyFilters( 'tb.dynamicSources.filters.adjustProvidersForBlocksInsideViews', i18n.postProviders, clientId );
 		const selectedPostProvider = find( filteredPostProviders, { value: dynamicSourcesEligibleAttribute.postProviderObject } );
+		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Source', 'wpv-views' ) };
 
 		return <Fragment key="post-provider-select">
-			<BaseControl label={ __( 'Post Source', 'toolset-blocks' ) } >
+			<BaseControl label={ hideLabels ? false : __( 'Post Source', 'wpv-views' ) } >
 				<Select
 					options={ filteredPostProviders }
 					styles={ this.customStyles }
+					{ ... placeholder }
 					value={ selectedPostProvider }
 					onChange={
 						value => {
@@ -162,6 +242,8 @@ class DynamicSourceClass extends Component {
 	};
 
 	dynamicSourceSelectChanged = async( value ) => {
+		doAction( 'tb.dynamicSources.actions.source.changed', value );
+
 		const { dynamicSourcesEligibleAttribute } = this.props;
 		const selectedSource = null !== value ? value.value : null;
 
@@ -200,20 +282,22 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicSourceSelect = () => {
-		const { dynamicSourcesEligibleAttribute } = this.props;
+		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
 		const sources = this.filterSources();
 		const selectedSource = find( this.ungroupedSources, { value: dynamicSourcesEligibleAttribute.sourceObject } ) || null;
 
 		if ( dynamicSourcesEligibleAttribute.postProviderObject === '__custom_post' && ! dynamicSourcesEligibleAttribute.customPostObject ) {
 			return null;
 		}
+		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Source', 'wpv-views' ) };
 
 		return <Fragment key="dynamic-source-select">
-			<BaseControl label={ __( 'Source', 'toolset-blocks' ) } >
+			<BaseControl label={ hideLabels ? false : __( 'Source', 'wpv-views' ) } >
 				<Select
 					isClearable
 					options={ sources }
 					styles={ this.customStyles }
+					{ ... placeholder }
 					value={ selectedSource }
 					onChange={ this.dynamicSourceSelectChanged }
 				/>
@@ -222,6 +306,8 @@ class DynamicSourceClass extends Component {
 	};
 
 	dynamicSourceFieldSelectChanged = async( value ) => {
+		doAction( 'tb.dynamicSources.actions.field.changed', value );
+
 		const { dynamicSourcesEligibleAttribute } = this.props;
 		const selectedField = null !== value ? value.value : null;
 
@@ -246,19 +332,21 @@ class DynamicSourceClass extends Component {
 	 * @returns {JSX}
 	 */
 	renderDynamicSourceSearchPost = () => {
-		const { dynamicSourcesEligibleAttribute } = this.props;
+		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
 
 		if ( dynamicSourcesEligibleAttribute.postProviderObject !== '__custom_post' ) {
 			return null;
 		}
+		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Name', 'wpv-views' ) };
 
 		return <Fragment key="dynamic-custom-post-select">
-			<BaseControl label={ __( 'Post Name', 'toolset-blocks' ) } >
+			<BaseControl label={ hideLabels ? false : __( 'Post Name', 'wpv-views' ) } >
 				<AsyncSelect
 					cacheOptions
 					loadOptions={ searchPost.bind( this ) }
 					onChange={ this.customPostSelectChanged }
 					styles={ this.customStyles }
+					{ ... placeholder }
 					value={ dynamicSourcesEligibleAttribute.customPostObject }
 				/>
 			</BaseControl>
@@ -304,7 +392,7 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicSourceFieldsSelect = () => {
-		const { dynamicSourcesEligibleAttribute } = this.props;
+		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
 
 		if ( dynamicSourcesEligibleAttribute.sourceObject ) {
 			// Getting the latest instance of fields from the JS object "ungroupedSources" created when filtering the
@@ -333,16 +421,38 @@ class DynamicSourceClass extends Component {
 			if ( !! selectedField && selectedField === singleField ) {
 				this.dynamicSourceFieldSelectChanged( selectedField[ 0 ] );
 			}
-			return <BaseControl label={ __( 'Field', 'toolset-blocks' ) } key="dynamic-source-fields-select">
+
+			const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Field', 'wpv-views' ) };
+
+			return <BaseControl label={ hideLabels ? false : __( 'Field', 'wpv-views' ) } key="dynamic-source-fields-select">
 				<Select
 					isClearable
 					options={ fields }
 					styles={ this.customStyles }
+					{ ... placeholder }
 					value={ selectedField }
 					onChange={ this.dynamicSourceFieldSelectChanged }
 				/>
 			</BaseControl>;
 		}
+	};
+
+	renderDynamicSourcesInfoMessages = () => {
+		if ( Object.keys( this.state.infoMessageQueue ).length <= 0 ) {
+			return null;
+		}
+
+		const messages = Object.keys( this.state.infoMessageQueue ).map(
+			messageKey => {
+				return (
+					<Notice status="info" key={ messageKey } isDismissible={ false }>
+						{ this.state.infoMessageQueue[ messageKey ] }
+					</Notice>
+				);
+			}
+		);
+
+		return messages;
 	};
 
 	renderDynamicSourceSelectControls = () => {
@@ -388,6 +498,7 @@ class DynamicSourceClass extends Component {
 				<div className={ clientId + attributeKey }>
 					{ this.renderDynamicSourceToggleControl() }
 					{ this.renderDynamicSourceSelectControls() }
+					{ this.renderDynamicSourcesInfoMessages() }
 				</div>
 			);
 		}

@@ -18,7 +18,7 @@ class CommentsStatus extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Comments Status', 'toolset-dynamic-sources' );
+		return __( 'Comments Status', 'wpv-views' );
 	}
 
 	/**

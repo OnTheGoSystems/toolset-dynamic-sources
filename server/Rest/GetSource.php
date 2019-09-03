@@ -67,6 +67,9 @@ class GetSource {
 		$post_type = $request->get_param( 'post_type' );
 		$post_id = $request->get_param( 'post_id' );
 		$post = get_post( $post_id );
+		if ( ! $post_type ) {
+			$post_type = $post->post_type;
+		}
 		setup_postdata( $post );
 		$this->post_type = $post_type;
 

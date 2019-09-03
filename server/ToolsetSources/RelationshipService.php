@@ -18,8 +18,8 @@ class RelationshipService {
 	 */
 	public function __construct() {
 		$this->roles = [
-			'parent' => new RelationshipRole( 'parent', __( 'Parent', 'toolset-dynamic-sources' ) ),
-			'child' => new RelationshipRole( 'child', __( 'Child', 'toolset-dynamic-sources' ) ),
+			'parent' => new RelationshipRole( 'parent', __( 'Parent', 'wpv-views' ) ),
+			'child' => new RelationshipRole( 'child', __( 'Child', 'wpv-views' ) ),
 		];
 	}
 

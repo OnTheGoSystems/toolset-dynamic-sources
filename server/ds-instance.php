@@ -1,46 +1,39 @@
 <?php
-$DS_VERSION = 100001;
+/**
+ * As Dynamic Sources can be packaged with multiple plugins, this number makes sure that the latest
+ * version is loaded. Raise the number by 1 right before you merge it to develop.
+ *
+ * 100000 = Version 1.0.0
+ * 101000 = Version 1.0.1
+ * 101001 = The  1 merge to develop while working on 1.0.2.
+ * ...
+ * 101019 = The 19 merge to develop while working on 1.0.2.
+ * 102000 = Version 1.0.2
+ *
+ * ...and so on...
+ */
+$toolset_dynamic_sources_version = 101000;
 
-if ( ! function_exists( 'ts_dynamic_sources_adjust_ds_instance' ) ) {
-	/**
-	 * Adjusts the Composer autoloader to load the most recent version of the Dynamic Sources API.
-	 *
-	 * It registers a filter that collects all the availabe Dynamic Sources API versions. When the time comes,
-	 * it feeds the Composer autoloader with the path to the most recent version of the Dynamic Sources API available.
-	 *
-	 * @param string $plugin_path     The root path of the plugin.
-	 * @param int    $ds_version      The version of the Dynamic Sources API.
-	 * @param string $ds_path         The version of the Dynamic Sources API.
-	 */
-	function ts_dynamic_sources_adjust_ds_instance( $plugin_path, $ds_version, $ds_path ) {
-		add_filter(
-			'toolset/dynamic_sources/filters/get_ds_instances',
-			function( $instances ) use ( $ds_version, $ds_path ) {
-				$instances[ $ds_version ] = $ds_path;
-				return $instances;
-			}
-		);
-
-		$ds_instances = apply_filters( 'toolset/dynamic_sources/filters/get_ds_instances', array() );
-		ksort( $ds_instances );
-
-		$loader = require $plugin_path . '/vendor/autoload.php';
-		$loader->setPsr4( 'Toolset\\DynamicSources\\', end( $ds_instances ) );
-
-		if ( ! has_action( 'init', 'initialize_ds' ) ) {
-			add_action( 'init', 'initialize_ds', 1 );
-		}
+/**
+ * Priority is: 100000 - $toolset_dynamic_sources_version <= 0
+ * This makes sure that the highest version number is called first.
+ */
+add_action( 'init', function() use ( $toolset_dynamic_sources_version ) {
+	if( defined( 'TOOLSET_DYNAMIC_SOURCES_LOADED' ) ) {
+		// A more recent version of Toolset Common ES is already active.
+		return;
 	}
-}
 
-if ( ! function_exists( 'initialize_ds' ) ) {
-	function initialize_ds() {
+	// Define TOOLSET_COMMON_ES_LOADED so any older instance of Common ES is not loaded.
+	define( 'TOOLSET_DYNAMIC_SOURCES_LOADED', $toolset_dynamic_sources_version );
+
+	// Apply a new init callback to actually load Dynamic Sources on priority 1.
+	add_action( 'init', function() {
+		// Register Autoloader
+		require_once __DIR__ . '/../psr4-autoload.php';
+
+		// Bootstrap DS
 		new Toolset\DynamicSources\DynamicSources();
 		do_action( 'toolset/dynamic_sources/actions/toolset_dynamic_sources_initialize' );
-	}
-}
-
-return array(
-	'version' => $DS_VERSION,
-	'path' => __DIR__,
-);
+	}, 1 );
+}, 100000 - $toolset_dynamic_sources_version );

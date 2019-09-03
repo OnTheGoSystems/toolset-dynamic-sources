@@ -18,7 +18,9 @@ class SearchPost {
 			'callback' => array( $this, 'search_post' ),
 			'args' => array(
 				's' => array(
-					'required' => true,
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'id' => array(
 					'sanitize_callback' => 'sanitize_text_field',
 				),
 			),
@@ -44,12 +46,18 @@ class SearchPost {
 	 * @return mixed|\WP_REST_Response
 	 */
 	public function search_post( \WP_REST_Request $request ) {
-		$search = $request->get_param( 's' );
-		$posts = get_posts( array(
-			's' => $search,
-			'post_count' => 5,
-			'post_type' => array_keys( get_post_types( array( 'public' => true ), 'names' ) ),
-		) );
+		$id = $request->get_param( 'id' );
+		if ( $id ) {
+			$p = get_post( $id );
+			$posts = $p ? [ $p ] : [];
+		} else {
+			$search = $request->get_param( 's' );
+			$posts = get_posts( array(
+				's' => $search,
+				'post_count' => 5,
+				'post_type' => array_keys( get_post_types( array( 'public' => true ), 'names' ) ),
+			) );
+		}
 
 		$result = [];
 		foreach ( $posts as $p ) {

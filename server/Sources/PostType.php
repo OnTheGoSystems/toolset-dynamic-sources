@@ -18,7 +18,7 @@ class PostType extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Type', 'toolset-dynamic-sources' );
+		return __( 'Post Type', 'wpv-views' );
 	}
 
 	/**

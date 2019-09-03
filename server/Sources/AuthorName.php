@@ -18,7 +18,7 @@ class AuthorName extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Author Name', 'toolset-dynamic-sources' );
+		return __( 'Author Name', 'wpv-views' );
 	}
 
 	/**

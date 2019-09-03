@@ -18,7 +18,7 @@ class PostStatus extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Post Status', 'toolset-dynamic-sources' );
+		return __( 'Post Status', 'wpv-views' );
 	}
 
 	/**

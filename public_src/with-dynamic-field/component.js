@@ -129,7 +129,7 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 			if ( ! this.props.attributes[ usedField.attributeKey ] && usedField.isActive && usedField.source ) {
 				return (
 					<span style={ { color: '#ccc' } }>
-						{ __( 'This dynamic source returned no content.', 'toolset-blocks' ) }
+						{ __( 'This dynamic source returned no content.', 'wpv-views' ) }
 					</span>
 				);
 			}
@@ -152,7 +152,7 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 		}
 
 		getFieldControlSetup( field ) {
-			const label = field.label || __( 'Dynamic Source', 'toolset-blocks' );
+			const label = field.label || __( 'Dynamic Source', 'wpv-views' );
 
 			return {
 				attributeKey: field.attributeKey,
