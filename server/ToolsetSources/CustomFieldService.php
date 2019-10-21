@@ -10,6 +10,14 @@ use Toolset\DynamicSources\DynamicSources;
  */
 class CustomFieldService {
 
+	/**
+	 * CustomFieldService constructor.
+	 */
+	public function __construct() {
+		// This filter is only present to make TCES work without DS.
+		// It prevents sites, which only use Toolset Forms, from the need to load DS at all.
+		add_filter( 'tces_get_categories_for_field_type', array( $this, 'filter_get_categories_for_field_type' ), 10, 2 );
+	}
 
 	/**
 	 * For a given post type, retrieve slugs of custom field groups that should be displayed on it.
@@ -179,6 +187,20 @@ class CustomFieldService {
 	 */
 	public function get_field_instance_for_current_post( FieldModel $field, $attributes = null ) {
 		return new FieldInstanceModel( $field, $attributes );
+	}
+
+	/**
+	 * Callback function on TCES filter "tces_get_categories_for_field_type".
+	 *
+	 * @param $incoming_categories Ignored.
+	 * @param $field_type
+	 *
+	 * @return array
+	 */
+	public function filter_get_categories_for_field_type( $incoming_categories, $field_type ) {
+		$categories = $this->get_categories_for_field_type( $field_type );
+
+		return $categories;
 	}
 
 	/**

@@ -4,6 +4,10 @@ namespace Toolset\DynamicSources\Scripts;
 
 use Composer\Installer\PackageEvent;
 
+/**
+ * @deprecated This is replaced by \Toolset\DynamicSources\Composer\PostInstallCmd and
+ * 		\Toolset\DynamicSources\Composer\PostPackageUpdate.
+ */
 class Composer {
 	const PACKAGE_NAME = 'toolset/dynamic-sources';
 

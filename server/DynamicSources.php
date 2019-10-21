@@ -157,19 +157,26 @@ class DynamicSources {
 	public function initialize_views_integration() {
 		$toolset_utils = $this->dic->make( \Toolset\DynamicSources\Utils\Toolset::class );
 		if ( $toolset_utils->is_views_enabled() ) {
+			$args = array(
+				':view_get_instance' => array(
+					'\WPV_View_Embedded',
+					'get_instance',
+				),
+				':content_template_get_instance' => array(
+					'\WPV_Content_Template_Embedded',
+					'get_instance',
+				),
+				':content_template_post_type' => \WPV_Content_Template_Embedded::POST_TYPE,
+				':wpa_helper_post_type' => null,
+			);
+
+			if ( class_exists( BlockEditorWPA::class ) ) {
+				$args[':wpa_helper_post_type'] = BlockEditorWPA::WPA_HELPER_POST_TYPE;
+			}
+
 			$toolset_views_integration = $this->dic->make(
 				\Toolset\DynamicSources\Integrations\Views::class,
-				array(
-					':view_get_instance' => array(
-						'\WPV_View_Embedded',
-						'get_instance',
-					),
-					':content_template_get_instance' => array(
-						'\WPV_Content_Template_Embedded',
-						'get_instance',
-					),
-					':content_template_post_type' => \WPV_Content_Template_Embedded::POST_TYPE,
-				)
+				$args
 			);
 
 			$toolset_views_integration->initialize();

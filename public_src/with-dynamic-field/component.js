@@ -6,7 +6,7 @@ import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 // Internal Dependencies
-import { DynamicSource } from '../control/dynamic-sources/DynamicSource';
+import { DynamicSourceUnified } from '../control/dynamic-sources/DynamicSourceUnified';
 import { fetchDynamicContent } from '../control/dynamic-sources/utils/fetchData';
 import PostPreview from '../control/post-preview/post-preview';
 import getDifferenceOfObjects from '../utils/object-get-difference';
@@ -89,7 +89,7 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 			}
 
 			return (
-				<DynamicSource
+				<DynamicSourceUnified
 					clientId={ this.props.clientId }
 					dynamicSourcesEligibleAttribute={ this.getFieldControlSetup( this.fields[ field ] ) }
 				/>
@@ -104,19 +104,12 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 			return this.fields[ field ];
 		}
 
-		dynamicFieldReset( field ) {
+		dynamicFieldReset( field, isActiveAfterReset = null ) {
 			if ( ! this.fieldExists( field ) ) {
 				return;
 			}
-			clearTimeout( this.updateFieldsAttributesDebounce );
 
-			this.fields[ field ] = {
-				...this.fields[ field ],
-				...DEFAULT_FIELD_ATTRIBUTES,
-			};
-
-			this.attributesUpdateRequired = true;
-			this.updateFieldsAttributesDebounce = setTimeout( this.doFieldsAttributeUpdate, 100 );
+			this.requestFieldAttributeUpdate( this.fields[ field ], null, isActiveAfterReset );
 		}
 
 		dynamicFieldNoDataRender( field ) {
@@ -158,43 +151,33 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 				attributeKey: field.attributeKey,
 				label: label,
 				condition: field.condition || field.isActive,
-				postProviderObject: field.provider,
-				sourceObject: field.source,
-				fieldObject: field.field,
-				customPostObject: field.customPost,
+				postProvider: field.provider,
+				source: field.source,
+				field: field.field,
+				customPost: field.customPost,
 				toggleHide: field.toggleHide || false,
 				toggleChangedCallback: () => {
 					this.requestFieldToggle( field );
 				},
-				selectPostProviderChangedCallback: value => {
-					this.requestFieldAttributeUpdate( field, 'provider', value );
-					if ( field.toggleHide ) {
-						this.requestFieldAttributeUpdate( field, 'isActive', true );
-					}
-				},
-				selectSourceChangedCallback: value => {
-					this.requestFieldAttributeUpdate( field, 'source', value );
-				},
-				selectFieldChangedCallback: value => {
-					this.requestFieldAttributeUpdate( field, 'field', value );
-				},
-				selectCustomPostChangedCallback: value => {
-					this.requestFieldAttributeUpdate( field, 'customPost', value );
-				},
-				sourceContentFetchedCallback: data => {
-					this.updateFieldContent( field, data );
+				fieldSelectedCallback: value => {
+					this.requestFieldAttributeUpdate( field, value );
 				},
 				category: field.category || 'text',
 				bannedCategories: field.bannedCategories || [],
 			};
 		}
 
-		updateFieldContent( field, data, returnValue = false ) {
+		/*
+		 * Push new content to the block.
+		 *
+		 * "source" This required for a workaround until toolsetblocks-578 is fixed. Just for image block.
+		 */
+		updateFieldContent( field, data, returnValue = false, source = null ) {
 			if ( data && field.customContentCallback ) {
 				if ( typeof field.customContentCallback !== 'function' ) {
 					this.throwError( 'customContentCallback must be a function.' );
 				} else {
-					field.customContentCallback( data );
+					field.customContentCallback( data, this.props.attributes, source );
 					return false;
 				}
 			} else {
@@ -220,29 +203,38 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 		}
 
 		requestFieldToggle( field ) {
-			clearTimeout( this.updateFieldsAttributesDebounce );
+			this.fields[ field.attributeKey ].isActive = ! this.fields[ field.attributeKey ].isActive;
+			this.attributesUpdateRequired = true;
+			this.doFieldsAttributeUpdate();
+			if ( this.fields[ field.attributeKey ].isActive ) {
+				this.requestUpdateContent();
+			}
+		}
 
-			this.fields[ field.attributeKey ] = { ...this.fields[ field.attributeKey ], ...DEFAULT_FIELD_ATTRIBUTES };
-
-			if ( ! field.isActive ) {
-				// currently inactive, toggle to active
+		requestFieldAttributeUpdate( field, value, isActiveAfterReset = null ) {
+			if ( isActiveAfterReset === null && field.toggleHide ) {
 				this.fields[ field.attributeKey ].isActive = true;
 			}
 
-			this.attributesUpdateRequired = true;
-			this.updateFieldsAttributesDebounce = setTimeout( this.doFieldsAttributeUpdate, 50 );
-		}
-
-		requestFieldAttributeUpdate( field, parameter, value ) {
-			clearTimeout( this.updateFieldsAttributesDebounce );
-
-			if ( ! this.fields[ field.attributeKey ][ parameter ] ||
-				this.fields[ field.attributeKey ][ parameter ] !== value ) {
-				this.fields[ field.attributeKey ][ parameter ] = value;
-				this.attributesUpdateRequired = true;
+			if ( isActiveAfterReset !== null ) {
+				this.fields[ field.attributeKey ].isActive = !! isActiveAfterReset;
 			}
 
-			this.updateFieldsAttributesDebounce = setTimeout( this.doFieldsAttributeUpdate, 120 );
+			if ( value === null ) {
+				this.fields[ field.attributeKey ].customPost = null;
+				this.fields[ field.attributeKey ].field = null;
+				this.fields[ field.attributeKey ].provider = null;
+				this.fields[ field.attributeKey ].source = null;
+			} else {
+				this.fields[ field.attributeKey ].customPost = value.customPost;
+				this.fields[ field.attributeKey ].field = value.field;
+				this.fields[ field.attributeKey ].provider = value.postProvider;
+				this.fields[ field.attributeKey ].source = value.source;
+			}
+			this.attributesUpdateRequired = true;
+
+			this.doFieldsAttributeUpdate();
+			this.requestUpdateContent();
 		}
 
 		doFieldsAttributeUpdate() {
@@ -293,14 +285,14 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 					customPost,
 				} = this.fields[ key ];
 
-				if ( ! isActive || ! source ) {
+				if ( ! isActive ) {
 					return;
 				}
 
 				const finalProvider = !! customPost ? customPost.value : provider;
 
 				const response = await fetchDynamicContent( finalProvider, postId, source, field ? field : null );
-				const updateAttributes = this.updateFieldContent( this.fields[ key ], response, true );
+				const updateAttributes = this.updateFieldContent( this.fields[ key ], response, true, source );
 
 				if ( updateAttributes !== false ) {
 					setAttributes( updateAttributes );

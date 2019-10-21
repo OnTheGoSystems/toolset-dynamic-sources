@@ -1,8 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { Fragment, Component } from '@wordpress/element';
-import { Toolbar, Spinner, Tooltip } from '@wordpress/components';
+import { Toolbar, Spinner } from '@wordpress/components';
 import { withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+import { Tooltip } from 'toolset/block/control';
 
 const { toolsetDynamicSourcesScriptData: i18n } = window;
 
@@ -82,7 +83,11 @@ class EditWrapperClass extends Component {
 
 		if ( hasDynamicSource && ! disableTooltip ) {
 			editWrapper = (
-				<Tooltip text={ <EditTooltip /> }>
+				<Tooltip
+					text={ <EditTooltip /> }
+					trigger="mouseenter focus click"
+					maxWidth="500"
+				>
 					{ editWrapper }
 				</Tooltip>
 			);

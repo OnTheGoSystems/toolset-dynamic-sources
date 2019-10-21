@@ -25,5 +25,6 @@ export { SaveWrapper } from './control/dynamic-sources/SaveWrapper';
 export { EditWrapper } from './control/dynamic-sources/EditWrapper';
 export { EditOverlay } from './control/dynamic-sources/EditOverlay';
 export { DynamicSource } from './control/dynamic-sources/DynamicSource';
+export { DynamicSourceUnified } from './control/dynamic-sources/DynamicSourceUnified';
 export { default as withToolsetDynamicField } from './with-dynamic-field/component';
 export { default as getShortcodeOrStatic } from './with-dynamic-field/get-shortcode-or-static';

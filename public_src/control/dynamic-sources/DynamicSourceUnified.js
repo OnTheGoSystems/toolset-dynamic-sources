@@ -10,7 +10,7 @@ import { has, isEmpty, cloneDeep, find, filter, includes, get, isUndefined } fro
 import { fetchDynamicContent, searchPost, loadSourceFromCustomPost } from './utils/fetchData';
 const { toolsetDynamicSourcesScriptData: i18n } = window;
 
-class DynamicSourceClass extends Component {
+class DynamicSourceUnifiedClass extends Component {
 	DEFAULT_POST_PROVIDER = null;
 
 	ungroupedSources = [];
@@ -20,10 +20,48 @@ class DynamicSourceClass extends Component {
 
 		this.DEFAULT_POST_PROVIDER = i18n.postProviders[ 0 ].value; // Current post.
 
+		const {
+			postProvider,
+			source,
+			field,
+			customPost,
+		} = props.dynamicSourcesEligibleAttribute;
+
+		const fieldWasSelected = Boolean( postProvider && source && field );
+
 		this.state = {
 			infoMessageQueue: {},
+			postProvider: postProvider,
+			customPost: customPost,
+			source: source,
+			field: field,
+			fieldWasSelected: fieldWasSelected,
 		};
 
+		addAction(
+			'tb.dynamicSources.actions.dynamicSourceComponentDidMount',
+			'toolset-blocks',
+			( clientId ) => {
+				// This action callback should be triggered only for the block that has just mounted the component.
+				if ( clientId !== this.props.clientId ) {
+					return;
+				}
+
+				const { dynamicSourcesEligibleAttribute } = this.props;
+				const selectedSource = find( this.ungroupedSources, { value: dynamicSourcesEligibleAttribute.sourceObject } ) || null;
+				if ( selectedSource ) {
+					doAction( 'tb.dynamicSources.actions.source.changed', selectedSource );
+
+					const selectedField = selectedSource.fields.length > 0 ? find( selectedSource.fields, { value: dynamicSourcesEligibleAttribute.fieldObject } ) : null;
+					if ( selectedField ) {
+						doAction( 'tb.dynamicSources.actions.field.changed', selectedField );
+					}
+				}
+			}
+		);
+	}
+
+	componentDidMount() {
 		addAction(
 			'tb.dynamicSources.actions.field.changed',
 			'toolset-blocks',
@@ -52,46 +90,15 @@ class DynamicSourceClass extends Component {
 			}
 		);
 
-		addAction(
-			'tb.dynamicSources.actions.dynamicSourceComponentDidMount',
-			'toolset-blocks',
-			( clientId ) => {
-				// This action callback should be triggered only for the block that has just mounted the component.
-				if ( clientId !== this.props.clientId ) {
-					return;
-				}
-
-				const { dynamicSourcesEligibleAttribute } = this.props;
-				const selectedSource = find( this.ungroupedSources, { value: dynamicSourcesEligibleAttribute.sourceObject } ) || null;
-				if ( selectedSource ) {
-					doAction( 'tb.dynamicSources.actions.source.changed', selectedSource );
-
-					const selectedField = selectedSource.fields.length > 0 ? find( selectedSource.fields, { value: dynamicSourcesEligibleAttribute.fieldObject } ) : null;
-					if ( selectedField ) {
-						doAction( 'tb.dynamicSources.actions.field.changed', selectedField );
-					}
-				}
-			}
-		);
-	}
-
-	componentDidMount() {
 		doAction( 'tb.dynamicSources.actions.dynamicSourceComponentDidMount', this.props.clientId );
-	}
 
-	/**
-	 * Loads custom post sources if needed
-	 *
-	 * @param {object} props React props
-	 */
-	async componentWillMount() {
-		const { dynamicSourcesEligibleAttribute } = this.props;
-		if ( !! dynamicSourcesEligibleAttribute.customPostObject && ! i18n.dynamicSources[ dynamicSourcesEligibleAttribute.customPostObject.value ] ) {
-			await this.loadSourceFromCustomPost( dynamicSourcesEligibleAttribute.customPostObject );
+		// Loads custom post sources if needed
+		if ( !! this.state.customPost && ! i18n.dynamicSources[ this.state.customPost.value ] ) {
+			this.loadSourceFromCustomPost( this.state.customPost );
 		}
 	}
 
-	componentDidUpdate = ( prevProps ) => {
+	componentDidUpdate = ( prevProps, prevState ) => {
 		if (
 			this.props.previewPost !== prevProps.previewPost &&
 			this.ungroupedSources.length &&
@@ -101,6 +108,43 @@ class DynamicSourceClass extends Component {
 			const selectedField = selectedSource.fields.length > 0 ? find( selectedSource.fields, { value: this.props.dynamicSourcesEligibleAttribute.fieldObject } ) : null;
 			this.dynamicSourceSelectChanged( selectedSource );
 			this.dynamicSourceFieldSelectChanged( selectedField );
+		}
+
+		if (
+			prevState.postProvider === this.state.postProvider &&
+			prevState.source === this.state.source &&
+			prevState.field === this.state.field
+		) {
+			return;
+		}
+
+		// Loads custom post sources if needed
+		if ( !! this.state.customPost && ! i18n.dynamicSources[ this.state.customPost.value ] ) {
+			this.loadSourceFromCustomPost( this.state.customPost );
+		}
+
+		// If we now have all 3 parts of field definition, call back.
+		if ( this.state.postProvider && this.state.source && this.state.field ) {
+			this.props.dynamicSourcesEligibleAttribute.fieldSelectedCallback( {
+				postProvider: this.state.postProvider,
+				source: this.state.source,
+				field: this.state.field,
+				customPost: this.state.customPost,
+			} );
+			this.setState( { fieldWasSelected: true } );
+		// If source is already a field, we only need 2 parts.
+		} else if ( this.state.postProvider && this.state.source && ! this.state.source.includes( '|' ) ) {
+			this.props.dynamicSourcesEligibleAttribute.fieldSelectedCallback( {
+				postProvider: this.state.postProvider,
+				source: this.state.source,
+				field: null,
+				customPost: this.state.customPost,
+			} );
+			this.setState( { fieldWasSelected: true } );
+		// And also call back if field was previously selected, but isn't any more.
+		} else if ( this.state.fieldWasSelected ) {
+			this.props.dynamicSourcesEligibleAttribute.fieldSelectedCallback( null );
+			this.setState( { fieldWasSelected: false } );
 		}
 	};
 
@@ -119,12 +163,12 @@ class DynamicSourceClass extends Component {
 	filterSources = () => {
 		const { dynamicSourcesEligibleAttribute, postType, clientId, componentId } = this.props;
 		const getProvider = () => {
-			if ( dynamicSourcesEligibleAttribute.postProviderObject === '__custom_post' ) {
-				if ( !! dynamicSourcesEligibleAttribute.customPostObject ) {
-					return dynamicSourcesEligibleAttribute.customPostObject.value;
+			if ( this.state.postProvider === '__custom_post' ) {
+				if ( !! this.state.customPost ) {
+					return this.state.customPost.value;
 				}
 			}
-			return dynamicSourcesEligibleAttribute.postProviderObject || this.DEFAULT_POST_PROVIDER;
+			return this.state.postProvider || this.DEFAULT_POST_PROVIDER;
 		};
 		const provider = getProvider();
 
@@ -135,7 +179,11 @@ class DynamicSourceClass extends Component {
 		 * @param array  i18n.dynamicSources The current set of Dynamic Sources.
 		 * @param string clientId            The client ID assigned to the block
 		 */
-		const viewsFilteredSources = applyFilters( 'tb.dynamicSources.filters.adjustSourcesForBlocksInsideViews', i18n.dynamicSources, clientId );
+		const viewsFilteredSources = applyFilters(
+			'tb.dynamicSources.filters.adjustSourcesForBlocksInsideViews',
+			i18n.dynamicSources,
+			clientId
+		);
 
 		/*
 		 * A block can have indepent DynamicSources like in Conditional Blocks
@@ -149,9 +197,14 @@ class DynamicSourceClass extends Component {
 			viewsFilteredSources;
 
 		// The array (i18n.dynamicSources[ provider ]) needs to be deep cloned because otherwise when it is filtered
-		// for attributes that receive a type of content that doesn't support all the sources, the ommited sources will
+		// for attributes that receive a type of content that doesn't support all the sources, the omitted sources will
 		// never be offered again, no matter the type of content the attribute can receive.
 		const dynamicSources = cloneDeep( filteredSources[ provider ] );
+
+		if ( ! dynamicSources ) {
+			return [];
+		}
+
 		dynamicSources.forEach(
 			element => {
 				element.options = element.options.filter(
@@ -202,10 +255,10 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicPostProviderSelect = () => {
-		const { dynamicSourcesEligibleAttribute, clientId, hideLabels } = this.props;
+		const { clientId, hideLabels } = this.props;
 
-		if ( ! dynamicSourcesEligibleAttribute.postProviderObject ) {
-			dynamicSourcesEligibleAttribute.selectPostProviderChangedCallback( this.DEFAULT_POST_PROVIDER );
+		if ( ! this.state.postProvider ) {
+			this.setState( { postProvider: this.DEFAULT_POST_PROVIDER } );
 		}
 
 		/*
@@ -215,8 +268,13 @@ class DynamicSourceClass extends Component {
 		 * @param array  i18n.postProviders The current set of Post providers.
 		 * @param string clientId           The client ID assigned to the block
 		 */
-		const filteredPostProviders = applyFilters( 'tb.dynamicSources.filters.adjustProvidersForBlocksInsideViews', i18n.postProviders, clientId );
-		const selectedPostProvider = find( filteredPostProviders, { value: dynamicSourcesEligibleAttribute.postProviderObject } );
+		const filteredPostProviders = applyFilters(
+			'tb.dynamicSources.filters.adjustProvidersForBlocksInsideViews',
+			i18n.postProviders,
+			clientId
+		);
+
+		const selectedPostProvider = find( filteredPostProviders, { value: this.state.postProvider } );
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Source', 'wpv-views' ) };
 
 		return <Fragment key="post-provider-select">
@@ -226,15 +284,12 @@ class DynamicSourceClass extends Component {
 					styles={ this.customStyles }
 					{ ... placeholder }
 					value={ selectedPostProvider }
-					onChange={
-						value => {
-							dynamicSourcesEligibleAttribute.selectPostProviderChangedCallback( value.value );
-							dynamicSourcesEligibleAttribute.selectCustomPostChangedCallback( null );
-							dynamicSourcesEligibleAttribute.selectSourceChangedCallback( null );
-							dynamicSourcesEligibleAttribute.selectFieldChangedCallback( null );
-							dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( '' );
-						}
-					}
+					onChange={ value => this.setState( {
+						postProvider: value.value,
+						customPost: null,
+						source: null,
+						field: null,
+					} ) }
 				/>
 			</BaseControl>
 		</Fragment>;
@@ -243,49 +298,26 @@ class DynamicSourceClass extends Component {
 	dynamicSourceSelectChanged = async( value ) => {
 		doAction( 'tb.dynamicSources.actions.source.changed', value );
 
-		const { dynamicSourcesEligibleAttribute } = this.props;
 		const selectedSource = null !== value ? value.value : null;
 
-		dynamicSourcesEligibleAttribute.selectSourceChangedCallback( selectedSource );
-		dynamicSourcesEligibleAttribute.selectFieldChangedCallback( null );
-		if (
-			value &&
-			0 === value.fields.length
-		) {
-			const { clientId, setLoading, post, previewPost } = this.props;
-			const provider = dynamicSourcesEligibleAttribute.postProviderObject || this.DEFAULT_POST_PROVIDER;
-
-			setLoading( clientId, true );
-
-			/*
-			 * Filters the preview Post ID for the cases when a block that uses Dynamic Sources is inside a View.
-			 *
-			 * @param array  previewPost The current preview post ( prviewPost || post).
-			 * @param string clientId    The client ID assigned to the block
-			 */
-			const previewPostID = applyFilters( 'tb.dynamicSources.filters.adjustPreviewPostID', previewPost || post, clientId );
-
-			const response = await this.fetchDynamicContent( provider, previewPostID, selectedSource );
-
-			if ( response === null ) {
-				// fetchDynamicContent returns null if something wents wrong on the apiFetch
-				// clear out content
-				dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( '' );
-			} else {
-				// pass new data
-				dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( response );
-			}
-
-			setLoading( clientId, false );
-		}
+		this.setState( {
+			source: selectedSource,
+			field: null,
+		} );
 	};
 
 	renderDynamicSourceSelect = () => {
-		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
+		const { hideLabels } = this.props;
 		const sources = this.filterSources();
-		const selectedSource = find( this.ungroupedSources, { value: dynamicSourcesEligibleAttribute.sourceObject } ) || null;
+		const selectedSource = find(
+			this.ungroupedSources,
+			{ value: this.state.source }
+		) || null;
 
-		if ( dynamicSourcesEligibleAttribute.postProviderObject === '__custom_post' && ! dynamicSourcesEligibleAttribute.customPostObject ) {
+		if (
+			this.state.postProvider === '__custom_post' &&
+			! this.state.customPost
+		) {
 			return null;
 		}
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Source', 'wpv-views' ) };
@@ -307,22 +339,9 @@ class DynamicSourceClass extends Component {
 	dynamicSourceFieldSelectChanged = async( value ) => {
 		doAction( 'tb.dynamicSources.actions.field.changed', value );
 
-		const { dynamicSourcesEligibleAttribute } = this.props;
 		const selectedField = null !== value ? value.value : null;
 
-		dynamicSourcesEligibleAttribute.selectFieldChangedCallback( selectedField );
-		if ( selectedField ) {
-			const { clientId, setLoading, post, previewPost } = this.props;
-			setLoading( clientId, true );
-			const provider = dynamicSourcesEligibleAttribute.postProviderObject;
-			const source = dynamicSourcesEligibleAttribute.sourceObject;
-
-			dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( '' );
-			const previewPostID = applyFilters( 'tb.dynamicSources.filters.adjustPreviewPostID', previewPost || post, clientId );
-			const response = await this.fetchDynamicContent( provider, previewPostID, source, selectedField );
-			dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( response );
-			setLoading( clientId, false );
-		}
+		this.setState( { field: selectedField } );
 	};
 
 	/**
@@ -331,9 +350,9 @@ class DynamicSourceClass extends Component {
 	 * @returns {JSX}
 	 */
 	renderDynamicSourceSearchPost = () => {
-		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
+		const { hideLabels } = this.props;
 
-		if ( dynamicSourcesEligibleAttribute.postProviderObject !== '__custom_post' ) {
+		if ( this.state.postProvider !== '__custom_post' ) {
 			return null;
 		}
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Name', 'wpv-views' ) };
@@ -346,7 +365,7 @@ class DynamicSourceClass extends Component {
 					onChange={ this.customPostSelectChanged }
 					styles={ this.customStyles }
 					{ ... placeholder }
-					value={ dynamicSourcesEligibleAttribute.customPostObject }
+					value={ this.state.customPost }
 				/>
 			</BaseControl>
 		</Fragment>;
@@ -356,20 +375,13 @@ class DynamicSourceClass extends Component {
 	 * Loads the source depending on custom post data
 	 *
 	 * @param {object} data Select data
+	 * @returns {void}
 	 */
 	async loadSourceFromCustomPost( data ) {
-		const {
-			clientId,
-			dynamicSourcesEligibleAttribute,
-			setLoading,
-		} = this.props;
-
-		setLoading( clientId, true );
-		await loadSourceFromCustomPost( data );
+		await loadSourceFromCustomPost( data ); // From fetchData.js
 
 		const providerId = data.value;
-		dynamicSourcesEligibleAttribute.postProviderObject = providerId;
-		setLoading( clientId, false );
+		this.setState( { postProvider: providerId } );
 	}
 
 	/**
@@ -378,27 +390,24 @@ class DynamicSourceClass extends Component {
 	 * @param {object} data Select data
 	 */
 	customPostSelectChanged = async( data ) => {
-		const {
-			dynamicSourcesEligibleAttribute,
-		} = this.props;
-
 		await this.loadSourceFromCustomPost( data );
 
-		dynamicSourcesEligibleAttribute.selectCustomPostChangedCallback( data );
-		dynamicSourcesEligibleAttribute.selectSourceChangedCallback( null );
-		dynamicSourcesEligibleAttribute.selectFieldChangedCallback( null );
-		dynamicSourcesEligibleAttribute.sourceContentFetchedCallback( '' );
+		this.setState( {
+			customPost: data,
+			source: null,
+			field: null,
+		} );
 	};
 
 	renderDynamicSourceFieldsSelect = () => {
 		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
 
-		if ( dynamicSourcesEligibleAttribute.sourceObject ) {
+		if ( this.state.source ) {
 			// Getting the latest instance of fields from the JS object "ungroupedSources" created when filtering the
 			// dynamic sources.
 			const source = find(
 				this.ungroupedSources,
-				[ 'value', dynamicSourcesEligibleAttribute.sourceObject ]
+				[ 'value', this.state.source ]
 			);
 			let fields = !! source ? source.fields : [];
 
@@ -414,8 +423,8 @@ class DynamicSourceClass extends Component {
 			const singleField = Object.keys( fields ).length === 1 ? fields : null;
 
 			const selectedField = [ 'image', 'video', 'audio' ].includes( dynamicSourcesEligibleAttribute.category ) ?
-				find( fields, { value: dynamicSourcesEligibleAttribute.fieldObject } ) :
-				find( fields, { value: dynamicSourcesEligibleAttribute.fieldObject } ) || singleField;
+				find( fields, { value: this.state.field } ) :
+				find( fields, { value: this.state.field } ) || singleField;
 
 			if ( !! selectedField && selectedField === singleField ) {
 				this.dynamicSourceFieldSelectChanged( selectedField[ 0 ] );
@@ -514,15 +523,14 @@ class DynamicSourceClass extends Component {
 	}
 
 	fetchDynamicContent( provider, previewPostID, source, selectedField ) {
-		const { dynamicSourcesEligibleAttribute } = this.props;
-		if ( ! dynamicSourcesEligibleAttribute.customPostObject ) {
+		if ( ! this.state.customPost ) {
 			return fetchDynamicContent( provider, previewPostID, source, selectedField );
 		}
 		// If custom post is selected, the ID is different than the current post or the preview post
 		const isCustomPost = this.isCustomPostProvider( provider );
-		const [ , customPostId ] = ( isCustomPost ? dynamicSourcesEligibleAttribute.customPostObject.value : '' ).split( '|' );
+		const [ , customPostId ] = ( isCustomPost ? this.state.customPost.value : '' ).split( '|' );
 		const postId = isCustomPost ? customPostId : previewPostID;
-		const finalProvider = isCustomPost ? dynamicSourcesEligibleAttribute.customPostObject.value : provider;
+		const finalProvider = isCustomPost ? this.state.customPost.value : provider;
 
 		return fetchDynamicContent( finalProvider, postId, source, selectedField );
 	}
@@ -532,10 +540,7 @@ class DynamicSourceClass extends Component {
 	}
 }
 
-/**
- * @deprecated use DynamicSourceUnified instead
- */
-const DynamicSource = compose( [
+const DynamicSourceUnified = compose( [
 	withSelect(
 		( select ) => {
 			const { getCurrentPostId, getCurrentPostType } = select( 'core/editor' );
@@ -559,5 +564,5 @@ const DynamicSource = compose( [
 			};
 		}
 	),
-] )( DynamicSourceClass );
-export { DynamicSource };
+] )( DynamicSourceUnifiedClass );
+export { DynamicSourceUnified };

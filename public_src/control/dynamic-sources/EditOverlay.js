@@ -1,5 +1,5 @@
 import { Component } from '@wordpress/element';
-import { Tooltip } from '@wordpress/components';
+import { Tooltip } from 'toolset/block/control';
 
 import EditTooltip from './EditTooltip';
 
@@ -22,7 +22,11 @@ class EditOverlay extends Component {
 		}
 
 		return (
-			<Tooltip text={ <EditTooltip /> }>
+			<Tooltip
+				text={ <EditTooltip /> }
+				trigger="mouseenter focus click"
+				maxWidth="500"
+			>
 				{ overlay }
 			</Tooltip>
 		);

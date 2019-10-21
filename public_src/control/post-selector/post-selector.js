@@ -4,7 +4,7 @@ import { Spinner } from '@wordpress/components';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose, withInstanceId } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
-import Select from 'react-select';
+import { Select } from 'toolset/block/control';
 import { find, maxBy } from 'lodash';
 import { addAction } from '@wordpress/hooks';
 import './scss/edit.scss';

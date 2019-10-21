@@ -47,13 +47,12 @@ class PostExcerpt extends AbstractSource {
 	 * @return string The content of the Source.
 	 */
 	public function get_content( $field = null, $attributes = null ) {
-		// Allow only a real `post_excerpt` and not the trimmed `post_content` from the `get_the_excerpt` filter
 		$post = get_post();
 
-		if ( ! $post || empty( $post->post_excerpt ) ) {
+		if ( ! $post || empty( get_the_excerpt( $post->ID ) ) ) {
 			return '';
 		}
 
-		return wp_kses_post( $post->post_excerpt );
+		return get_the_excerpt( $post->ID );
 	}
 }

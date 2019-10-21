@@ -24,6 +24,7 @@ class IdentityPost implements PostProvider {
 	 */
 	public function __construct( $post_type_slugs ) {
 		$this->post_type_slugs = $post_type_slugs;
+		$this->update_post_types_from_taxonomies();
 	}
 
 
@@ -63,5 +64,26 @@ class IdentityPost implements PostProvider {
 	 */
 	public function get_post_types() {
 		return $this->post_type_slugs;
+	}
+
+	/**
+	 * Updates the list of post types slugs if they are categories
+	 */
+	private function update_post_types_from_taxonomies() {
+		$taxonomies = [];
+		foreach ( $this->post_type_slugs as $post_type_slug ) {
+			if ( taxonomy_exists( $post_type_slug ) ) {
+				$taxonomies[] = $post_type_slug;
+			}
+		}
+		if ( ! empty( $taxonomies ) ) {
+			$post_types = get_post_types();
+			foreach ( $post_types as $post_type ) {
+				$intersect = array_intersect( $taxonomies, get_object_taxonomies( $post_type ) );
+				if ( ! empty( $intersect ) ) {
+					$this->post_type_slugs[] = $post_type;
+				}
+			}
+		}
 	}
 }

@@ -26,7 +26,7 @@ class PostField extends AbstractSource {
 	 * @return string
 	 */
 	public function get_name() {
-		return $this->meta->meta_key;
+		return $this->meta;
 	}
 
 	/**
@@ -35,7 +35,7 @@ class PostField extends AbstractSource {
 	 * @return string
 	 */
 	public function get_title() {
-		return $this->meta->meta_key;
+		return $this->meta;
 	}
 
 	/**
@@ -67,6 +67,6 @@ class PostField extends AbstractSource {
 		if ( ! $post_id && $post ) {
 			$post_id = $post->ID;
 		}
-		return get_post_meta( $post_id, $this->meta->meta_key, true );
+		return get_post_meta( $post_id, $this->meta, true );
 	}
 }

@@ -1,7 +1,10 @@
+// External dependencies
 import { Component } from '@wordpress/element';
 import { addAction, addFilter, doAction } from '@wordpress/hooks';
 import { select, subscribe } from '@wordpress/data';
+import { includes } from 'lodash';
 
+// Internal dependencies
 const { toolsetDynamicSourcesScriptData: i18n, Toolset } = window;
 
 class ViewEditor extends Component {
@@ -115,9 +118,10 @@ class ViewEditor extends Component {
 				i18n.postProvidersForViews = { ...i18n.postProvidersForViews, ...postProvidersForViews };
 				i18n.dynamicSourcesForViews = { ...i18n.dynamicSourcesForViews, ...dynamicSourcesForViews };
 
+				let shouldSendCacheTick = false;
 				const newCacheForViews = { ...i18n.cacheForViews, ...cacheForViews };
 				if ( JSON.stringify( newCacheForViews ) !== JSON.stringify( i18n.cacheForViews ) ) {
-					doAction( 'tb.dynamicSources.actions.cache.tick' );
+					shouldSendCacheTick = true;
 					i18n.cacheForViews = newCacheForViews;
 
 					// Triggering the View preview update for all the Views which have the same "previewPostId".
@@ -126,6 +130,14 @@ class ViewEditor extends Component {
 							doAction( 'toolset.views.updatePreview', storeId );
 						}
 					);
+				}
+
+				if ( this.previewPostId !== dynamicSourcesInfo.previewPostId ) {
+					shouldSendCacheTick = true;
+				}
+
+				if ( shouldSendCacheTick ) {
+					doAction( 'tb.dynamicSources.actions.cache.tick' );
 				}
 			}
 		} );
@@ -158,7 +170,7 @@ class ViewEditor extends Component {
 			currentBlockId = getBlockRootClientId( currentBlockId );
 			if ( !! currentBlockId ) {
 				const block = getBlock( currentBlockId );
-				if ( block.name === 'toolset-views/view-editor' ) {
+				if ( includes( [ 'toolset-views/view-editor', 'toolset-views/wpa-editor' ], block.name ) ) {
 					result = block;
 				}
 			}

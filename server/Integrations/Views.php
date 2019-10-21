@@ -6,18 +6,27 @@ class Views {
 	/** @var string */
 	private $content_template_post_type;
 
+	/** @var string */
+	private $wpa_helper_post_type;
+
 	/** @var array */
 	private $content_template_get_instance;
 
 	/** @var array */
 	private $view_get_instance;
 
-	public function __construct( array $view_get_instance, array $content_template_get_instance, $content_template_post_type ) {
+	public function __construct(
+		array $view_get_instance,
+		array $content_template_get_instance,
+		$content_template_post_type,
+		$wpa_helper_post_type
+	) {
 		if ( ! is_string( $content_template_post_type ) ) {
 			throw new \InvalidArgumentException( 'The Content Template post type argument ($content_template_post_type) has to be a string.' );
 		}
 
 		$this->content_template_post_type = $content_template_post_type;
+		$this->wpa_helper_post_type = $wpa_helper_post_type;
 		$this->content_template_get_instance = $content_template_get_instance;
 		$this->view_get_instance = $view_get_instance;
 	}
@@ -34,7 +43,9 @@ class Views {
 
 		add_action( 'toolset/dynamic_sources/filters/post_type_for_source_context', array( $this, 'adjust_post_types_for_source_context_in_view' ), 10, 2 );
 
-		add_filter( 'toolset/dynamic_sources/filters/shortcode_post', array( $this, 'is_ct_with_post_content_source' ), 10, 4 );
+		add_filter( 'toolset/dynamic_sources/filters/shortcode_post', array( $this, 'maybe_get_preview_post_id_for_ct_with_post_content_source' ), 10, 4 );
+
+		add_filter( 'toolset/dynamic_sources/filters/shortcode_post', array( $this, 'maybe_get_preview_post_id_for_wpa_with_post_content_source' ), 10, 4 );
 
 		add_filter( 'toolset/dynamic_sources/filters/post_sources', array( $this, 'maybe_exclude_post_content_source_from_post_sources' ) );
 	}
@@ -329,7 +340,7 @@ class Views {
 	 *
 	 * @return int|null
 	 */
-	public function is_ct_with_post_content_source( $post, $post_provider, $source, $field ) {
+	public function maybe_get_preview_post_id_for_ct_with_post_content_source( $post, $post_provider, $source, $field ) {
 		if (
 			'post-content' !== $source ||
 			get_post_type( $post ) !== $this->content_template_post_type
@@ -363,7 +374,15 @@ class Views {
 
 		switch ( $pagenow ) {
 			case 'post.php':
-				if ( get_post_type( $post ) !== $this->content_template_post_type ) {
+				if (
+					! in_array(
+						get_post_type( $post ),
+						array(
+							$this->content_template_post_type,
+							$this->wpa_helper_post_type
+						)
+					)
+				) {
 					$should_exclude_post_content_source = true;
 				}
 				break;
@@ -383,4 +402,27 @@ class Views {
 
 		return $post_sources;
 	}
+
+	/**
+	 * Returns the preview post ID if the "post" is the ID of a WordPress Archive and the selected "source" is "post-content".
+	 * If for some reason there is no preview post ID meta for the Content Template, it returns null.
+	 *
+	 * @param $post
+	 * @param $post_provider
+	 * @param $source
+	 * @param $field
+	 *
+	 * @return int|null
+	 */
+	public function maybe_get_preview_post_id_for_wpa_with_post_content_source( $post, $post_provider, $source, $field ) {
+		if (
+			'post-content' === $source &&
+			get_post_type( $post ) === $this->wpa_helper_post_type
+		) {
+			return null;
+		}
+
+		return $post;
+	}
+
 }

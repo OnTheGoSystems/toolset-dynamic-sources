@@ -71,17 +71,7 @@ const fetchCache = async( postID ) => {
 	try {
 		return await apiFetch( { path: `/toolset-dynamic-sources/v1/get-cache?post=${ postID }` } );
 	} catch ( error ) {
-		const errorMessage = sprintf(
-			// translators: placeholder is an error message.
-			__( 'Something went wrong while trying to update the sources cache, with message: "%s". Please reload the page and try again.', 'wpv-views' ),
-			error.message
-		);
-
-		dispatch( 'core/notices' ).createErrorNotice(
-			errorMessage,
-			{ id: 'toolset_blocks_cache_update_error' }
-		);
-
+		// No notice displayed to avoid users to get confused. Some non-related Toolset error might cause an error.
 		return null;
 	}
 };
