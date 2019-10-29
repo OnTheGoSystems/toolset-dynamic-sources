@@ -12,7 +12,7 @@
  *
  * ...and so on...
  */
-$toolset_dynamic_sources_version = 104000;
+$toolset_dynamic_sources_version = 105000;
 
 /**
  * Priority is: 100000 - $toolset_dynamic_sources_version <= 0

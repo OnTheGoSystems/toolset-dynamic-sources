@@ -18,16 +18,16 @@ class PostInstallCmd {
 	 * @param $event
 	 */
 	public static function run( $event ) {
-		$event->getIO()->write( "-------------------------------------------------------" );
-		$event->getIO()->write( "-- TOOLSET DYNAMIC SOURCES: Installing NPM Packages. --" );
-		$event->getIO()->write( "-------------------------------------------------------" );
-		Common::runNpmCommand( 'install --only=prod' );
+		$event->getIO()->write( '-------------------------------------------------------' );
+		$event->getIO()->write( '-- TOOLSET DYNAMIC SOURCES: Installing NPM Packages. --' );
+		$event->getIO()->write( '-------------------------------------------------------' );
+		Common::runNpmCommand( 'ci --only=prod' );
 
-		$event->getIO()->write( "-------------------------------------------------------" );
-		$event->getIO()->write( "-- TOOLSET DYNAMIC SOURCES: Generating build files.  --" );
-		$event->getIO()->write( "-------------------------------------------------------" );
+		$event->getIO()->write( '-------------------------------------------------------' );
+		$event->getIO()->write( '-- TOOLSET DYNAMIC SOURCES: Generating build files.  --' );
+		$event->getIO()->write( '-------------------------------------------------------' );
 		Common::runNpmCommand( 'run build' );
 
-		$event->getIO()->write( "Completed." );
+		$event->getIO()->write( 'Completed.' );
 	}
 }
