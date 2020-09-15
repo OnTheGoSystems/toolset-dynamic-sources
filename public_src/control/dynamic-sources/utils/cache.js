@@ -7,11 +7,12 @@ const { toolsetDynamicSourcesScriptData: i18n } = window;
 
 const INTERVAL = 30000; // in milliseconds/
 
-const initiateCacheFetching = async() => {
+const initiateCacheFetching = async( force ) => {
 	const coreEditorStore = select( 'core/editor' );
+	const coreBlockEditorStore = select( 'core/block-editor' );
 	// The core editor blocks object is getting flattened and on the generated sting, instances of the "toolset-blocks/"
 	// substring are being tracked to indicate the any Toolset Block is used in the current instance of the editor.
-	const editorBlocksStringified = JSON.stringify( coreEditorStore.getBlocks() );
+	const editorBlocksStringified = JSON.stringify( coreBlockEditorStore.getBlocks() );
 	const editorHasToolsetBlocks = !! editorBlocksStringified.includes( 'dynamic' );
 	const editorHasFieldBlocks = !! editorBlocksStringified.includes( 'toolset-blocks/field' );
 	const editorHasRepeatingFieldBlocks = !! editorBlocksStringified.includes( 'toolset-blocks/repeating-field' );
@@ -20,6 +21,7 @@ const initiateCacheFetching = async() => {
 	// If no Toolset Blocks are included in the editor, there is no reason to update tha cache.
 	if (
 		! (
+			force ||
 			editorHasToolsetBlocks ||
 			editorHasFieldsAndTextBlocks ||
 			editorHasFieldBlocks ||
@@ -64,8 +66,8 @@ const addCacheFetchingInitiationHook = () => {
 	addAction(
 		'tb.dynamicSources.actions.cache.initiateFetching',
 		'toolset-blocks',
-		() => {
-			initiateCacheFetching();
+		( force = false ) => {
+			initiateCacheFetching( force );
 		}
 	);
 };

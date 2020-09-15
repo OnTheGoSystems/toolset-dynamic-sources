@@ -3,7 +3,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { ToggleControl, BaseControl, Notice } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { applyFilters, doAction, addAction } from '@wordpress/hooks';
-import { compose } from '@wordpress/compose';
+import { compose, pure } from '@wordpress/compose';
 import { Select, AsyncSelect } from 'toolset/block/control';
 import { has, isEmpty, cloneDeep, find, filter, includes, get, isUndefined } from 'lodash';
 
@@ -31,7 +31,7 @@ class DynamicSourceUnifiedClass extends Component {
 
 		this.state = {
 			infoMessageQueue: {},
-			postProvider: postProvider,
+			postProvider: postProvider ? postProvider : this.DEFAULT_POST_PROVIDER,
 			customPost: customPost,
 			source: source,
 			field: field,
@@ -235,12 +235,18 @@ class DynamicSourceUnifiedClass extends Component {
 						this.ungroupedSources.push( option );
 						if ( has( option, 'fields' ) && ! isEmpty( option.fields ) ) {
 							const fieldsOfCategory = find( option.fields, ( field ) => {
+								if ( !! dynamicSourcesEligibleAttribute.forceRepeatable && ! field.is_repetitive ) {
+									return false;
+								}
 								if ( ! isCategoryBanned( field.categories, dynamicSourcesEligibleAttribute.bannedCategories ) ) {
 									return false;
 								}
 								return includes( field.categories, dynamicSourcesEligibleAttribute.category );
 							} );
 							return ! isEmpty( fieldsOfCategory );
+						}
+						if ( !! dynamicSourcesEligibleAttribute.forceRepeatable && !! option.fields && ! option.fields.length ) {
+							return false;
 						}
 						if ( ! isCategoryBanned( option.categories, dynamicSourcesEligibleAttribute.bannedCategories ) ) {
 							return false;
@@ -255,11 +261,8 @@ class DynamicSourceUnifiedClass extends Component {
 	};
 
 	renderDynamicPostProviderSelect = () => {
-		const { clientId, hideLabels } = this.props;
-
-		if ( ! this.state.postProvider ) {
-			this.setState( { postProvider: this.DEFAULT_POST_PROVIDER } );
-		}
+		const { clientId } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 
 		/*
 		 * Filters the Post providers offered by the relevant control. It adjust the control offered values for the
@@ -278,7 +281,7 @@ class DynamicSourceUnifiedClass extends Component {
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Source', 'wpv-views' ) };
 
 		return <Fragment key="post-provider-select">
-			<BaseControl label={ hideLabels ? false : __( 'Post Source', 'wpv-views' ) } >
+			<BaseControl label={ ! hideLabels ? false : __( 'Post Source', 'wpv-views' ) } >
 				<Select
 					options={ filteredPostProviders }
 					styles={ this.customStyles }
@@ -307,7 +310,7 @@ class DynamicSourceUnifiedClass extends Component {
 	};
 
 	renderDynamicSourceSelect = () => {
-		const { hideLabels } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 		const sources = this.filterSources();
 		const selectedSource = find(
 			this.ungroupedSources,
@@ -323,7 +326,7 @@ class DynamicSourceUnifiedClass extends Component {
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Source', 'wpv-views' ) };
 
 		return <Fragment key="dynamic-source-select">
-			<BaseControl label={ hideLabels ? false : __( 'Source', 'wpv-views' ) } >
+			<BaseControl label={ ! hideLabels ? false : __( 'Source', 'wpv-views' ) } >
 				<Select
 					isClearable
 					options={ sources }
@@ -350,16 +353,18 @@ class DynamicSourceUnifiedClass extends Component {
 	 * @returns {JSX}
 	 */
 	renderDynamicSourceSearchPost = () => {
-		const { hideLabels } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 
 		if ( this.state.postProvider !== '__custom_post' ) {
 			return null;
 		}
-		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Name', 'wpv-views' ) };
+		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Start typing to search...', 'wpv-views' ) };
 
 		return <Fragment key="dynamic-custom-post-select">
-			<BaseControl label={ hideLabels ? false : __( 'Post Name', 'wpv-views' ) } >
+			<BaseControl label={ ! hideLabels ? false : __( 'Post', 'wpv-views' ) } >
 				<AsyncSelect
+					isClearable
+					defaultOptions
 					cacheOptions
 					loadOptions={ searchPost.bind( this ) }
 					onChange={ this.customPostSelectChanged }
@@ -400,7 +405,8 @@ class DynamicSourceUnifiedClass extends Component {
 	};
 
 	renderDynamicSourceFieldsSelect = () => {
-		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
+		const { dynamicSourcesEligibleAttribute } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 
 		if ( this.state.source ) {
 			// Getting the latest instance of fields from the JS object "ungroupedSources" created when filtering the
@@ -413,7 +419,12 @@ class DynamicSourceUnifiedClass extends Component {
 
 			fields = filter(
 				fields,
-				( field ) => includes( field.categories, dynamicSourcesEligibleAttribute.category )
+				( field ) => {
+					if ( !! dynamicSourcesEligibleAttribute.forceRepeatable && ! field.is_repetitive ) {
+						return false;
+					}
+					return includes( field.categories, dynamicSourcesEligibleAttribute.category );
+				}
 			);
 
 			if ( isEmpty( fields ) ) {
@@ -432,7 +443,7 @@ class DynamicSourceUnifiedClass extends Component {
 
 			const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Field', 'wpv-views' ) };
 
-			return <BaseControl label={ hideLabels ? false : __( 'Field', 'wpv-views' ) } key="dynamic-source-fields-select">
+			return <BaseControl label={ ! hideLabels ? false : __( 'Field', 'wpv-views' ) } key="dynamic-source-fields-select">
 				<Select
 					isClearable
 					options={ fields }
@@ -541,6 +552,7 @@ class DynamicSourceUnifiedClass extends Component {
 }
 
 const DynamicSourceUnified = compose( [
+	pure,
 	withSelect(
 		( select ) => {
 			const { getCurrentPostId, getCurrentPostType } = select( 'core/editor' );

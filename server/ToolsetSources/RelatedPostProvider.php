@@ -60,16 +60,44 @@ class RelatedPostProvider implements PostProvider {
 
 
 	/**
-	 * Label that an be displayed in the dropdown.
+	 * Label that is displayed in the dropdown.
+	 *
+	 * @param bool $with_relationship Add relationship name to label. (Used to distinguish duplicate labels).
 	 *
 	 * @return string
 	 */
-	public function get_label() {
-		return sprintf(
-			__( '%s in the %s relationship', 'wpv-views' ),
-			$this->role->get_label(),
-			$this->relationship->get_display_name()
-		);
+	public function get_label( $with_relationship = false ) {
+		if ( $this->relationship->is_views_filtered_o_2_m() ) {
+			$label = sprintf(
+				__( 'Relationship: %s', 'wpv-views' ),
+				$this->relationship->get_display_name()
+			);
+		} elseif ( $this->relationship->is_intermediary() ) {
+			$label = sprintf(
+				__( 'Related: %s', 'wpv-views' ),
+				$this->get_post_label()
+			);
+		} else {
+			$label = sprintf(
+				'%s: %s', // Nothing to translate here.
+				$this->role->get_label(),
+				$this->get_post_label()
+			);
+		}
+		$relationship = $with_relationship ?
+			' (' . $this->relationship->get_display_name() . ')' :
+			'';
+
+		return $label . $relationship;
+	}
+
+	/**
+	 * @return string
+	 */
+	private function get_post_label() {
+		return get_post_type_object( $this->relationship->get_post_type_by_role( $this->role->get_name() ) )
+			->labels
+			->singular_name;
 	}
 
 
@@ -84,19 +112,15 @@ class RelatedPostProvider implements PostProvider {
 	 */
 	public function get_post( $initial_post_id ) {
 		$initial_post = get_post( $initial_post_id );
-		if( null === $initial_post ) {
+		if ( null === $initial_post ) {
 			return null;
 		}
 
-		$post_id = $this->relationship_service->get_related_post(
+		return $this->relationship_service->get_related_post(
 			$initial_post,
-			$this->relationship->get_slug(),
-			$this->relationship_service->get_other_role_name(
-				$this->relationship->get_role_by_post_type( $initial_post->post_type )
-			)
+			$this->relationship,
+			$this->role->get_name()
 		);
-
-		return $post_id;
 	}
 
 

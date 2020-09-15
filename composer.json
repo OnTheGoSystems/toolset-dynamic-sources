@@ -20,12 +20,22 @@
         "Toolset\\DynamicSources\\": "server/"
       }
     },
+    "autoload-dev": {
+      "classmap": [
+        "tests/stubs"
+      ]
+    },
     "require": {
       "php": ">=5.6.0",
       "rdlowrey/auryn": "^1.4"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-master",
-        "otgs/unit-tests-framework": "~1.2.0"
+      "roave/security-advisories": "dev-master",
+      "otgs/unit-tests-framework": "~1.2.7",
+      "sebastian/phpcpd": "^3.0",
+      "phpcompatibility/php-compatibility": "^9.1",
+      "phpcompatibility/phpcompatibility-wp": "^2.0",
+      "otgs/toolset-coding-standards": "dev-master",
+      "dealerdirect/phpcodesniffer-composer-installer": "^0.6.1"
     }
 }

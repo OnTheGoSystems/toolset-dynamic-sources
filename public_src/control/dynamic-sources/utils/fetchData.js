@@ -4,6 +4,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { addAction, doAction } from '@wordpress/hooks';
 
 import { isEqual } from 'lodash';
+import isCustomPostProvider from '../../../utils/is-custom-post-provider';
 
 const { toolsetDynamicSourcesScriptData: i18n } = window;
 
@@ -19,7 +20,10 @@ const getContentFromCache = ( provider, post, source, field ) => {
 	if (
 		'undefined' !== typeof cache[ provider ] &&
 		'undefined' !== typeof cache[ provider ][ source ] &&
-		post === cache[ provider ][ 'post-id' ]
+		(
+			post === cache[ provider ][ 'post-id' ] || // Handles cache for current post provider
+			isCustomPostProvider( provider ) // Handles cache for custom post provider
+		)
 	) {
 		content = cache[ provider ][ source ];
 	}
@@ -31,7 +35,11 @@ const getContentFromCache = ( provider, post, source, field ) => {
 	return '' !== content ? { sourceContent: content } : null;
 };
 
-const fetchDynamicContent = async( provider, post, source, field = null ) => {
+const fetchDynamicContent = async( provider, post, source, field = null, viewId = null ) => {
+	if ( ! provider || ! post || ! source ) {
+		return null;
+	}
+
 	const maybeContentIsCached = getContentFromCache( provider, post, source, field );
 	if ( maybeContentIsCached ) {
 		return maybeContentIsCached;
@@ -42,11 +50,14 @@ const fetchDynamicContent = async( provider, post, source, field = null ) => {
 	let subpath = '';
 
 	if ( field ) {
-		subpath += `field=${ field }`;
+		subpath += `&field=${ field }`;
+	}
+	if ( viewId ) {
+		subpath += `&view-id=${ viewId }`;
 	}
 
 	if ( '' !== subpath ) {
-		path += `&${ subpath }`;
+		path += subpath;
 	}
 
 	try {
@@ -109,11 +120,23 @@ const loadSourceFromCustomPost = async( data ) => {
 	if ( ! i18n.postProviders.find( item => item.value === providerId ) ) {
 		i18n.postProviders.push( { value: providerId, label: data.label } );
 	}
+
+	// Triggered right after the offered post providers have been updated for the loaded custom post.
+	// Initially used to update the post providers for Views when a custom post is used.
+	doAction( 'tb.dynamicSources.actions.providers.customPostLoaded', providerId, data.label );
+
 	i18n.dynamicSources[ providerId ] = source.__current_post;
+
+	// Triggered right after the offered dynamic sources have been updated for the loaded custom post.
+	// Initially used to update the dynamic sources for Views when a custom post is used.
+	doAction( 'tb.dynamicSources.actions.source.customPostLoaded', providerId, source );
 
 	fetchCache( postId )
 		.then( cache => {
 			i18n.cache[ providerId ] = cache.__current_post;
+			// Triggered right after the offered cache has been updated for the loaded custom post.
+			// Initially used to update the cache for Views when a custom post is used.
+			doAction( 'tb.dynamicSources.actions.cache.customPostLoaded', providerId, cache );
 			doAction( 'tb.caching.updated' );
 		} );
 	addAction(

@@ -30,6 +30,7 @@ export class SaveWrapper extends Component {
 		const providers = [];
 		const sources = [];
 		const fields = [];
+		const defaultValues = [];
 
 		usedDynamics.map( dynamic => {
 			if ( !! dynamic.customPost ) {
@@ -39,11 +40,17 @@ export class SaveWrapper extends Component {
 			}
 			sources.push( dynamic.source );
 			fields.push( !! dynamic.field ? dynamic.field : '' );
+			if ( !! dynamic[ 'default-value' ] || dynamic[ 'default-value' ] === 0 ) {
+				defaultValues.push( dynamic[ 'default-value' ] );
+			}
 		} );
 
 		shortcode += ` provider='${ providers.join( scValueSeparator ) }'`;
 		shortcode += ` source='${ sources.join( scValueSeparator ) }'`;
 		shortcode += ` field='${ fields.join( scValueSeparator ) }'`;
+		if ( defaultValues.length ) {
+			shortcode += ` default-value='${ defaultValues.join( scValueSeparator ) }'`;
+		}
 
 		shortcode += ']';
 

@@ -9,7 +9,7 @@ use Toolset\DynamicSources\DynamicSources;
  *
  * @package toolset-dynamic-sources
  */
-class AuthorID extends AbstractSource {
+class AuthorID extends AuthorSource {
 	const NAME = 'author-id';
 
 	/**
@@ -22,23 +22,13 @@ class AuthorID extends AbstractSource {
 	}
 
 	/**
-	 * Gets the Source group.
-	 *
-	 * @return string
-	 */
-	public function get_group() {
-		return DynamicSources::AUTHOR_GROUP;
-	}
-
-	/**
 	 * Gets the Source categories, i.e. the type of content this Source can offer.
 	 *
 	 * @return array
 	 */
 	public function get_categories() {
-		return array( DynamicSources::TEXT_CATEGORY );
+		return array( DynamicSources::TEXT_CATEGORY, DynamicSources::NUMBER_CATEGORY );
 	}
-
 
 	/**
 	 * Gets the content of the Source.
@@ -46,9 +36,9 @@ class AuthorID extends AbstractSource {
 	 * @param null|string $field
 	 * @param array|null  $attributes Extra attributes coming from shortcode
 	 *
-	 * @return string The content of the Source.
+	 * @return int Author ID
 	 */
 	public function get_content( $field = null, $attributes = null ) {
-		return wp_kses_post( get_the_author() );
+		return wp_kses_post( get_the_author_meta( 'ID' ) );
 	}
 }

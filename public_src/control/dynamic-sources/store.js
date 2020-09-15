@@ -34,7 +34,7 @@ const actions = {
 		};
 	},
 	// eslint-disable-next-line
-	getDynamicSources: ( postTypes, previewPostID, randomAttr ) => {
+	getDynamicSources: ( postTypes, previewPostID, randomAttr, viewId ) => {
 		// A random value is always passed as an argument to the store's selector in order to always invoke the
 		// relevant resolver. The data package seems to be doing some kind of caching when it comes to resolvers
 		// with argument values that have already been resolved, To bypass this a random argument needs to be fed in,
@@ -43,6 +43,7 @@ const actions = {
 			type: 'DYNAMIC_SOURCES_GET',
 			postTypes,
 			previewPostID,
+			viewId,
 		};
 	},
 };
@@ -82,17 +83,17 @@ const selectors = {
 const dynamicSourcesService = new DynamicSourcesService();
 const controls = {
 	DYNAMIC_SOURCES_GET( action ) {
-		return dynamicSourcesService.get( action.postTypes, action.previewPostID );
+		return dynamicSourcesService.get( action.postTypes, action.previewPostID, action.viewId );
 	},
 };
 
 const resolvers = {
-	* getDynamicSources( postTypes, previewPostID, randomAttr ) {
+	* getDynamicSources( postTypes, previewPostID, randomAttr, viewId ) {
 		// A random value is always passed as an argument to the store's selector in order to always invoke the
 		// relevant resolver. The "data" package seems to be doing some kind of caching when it comes to resolvers
 		// with argument values that have already been resolved, To bypass this a random argument needs to be fed in,
 		// to fake an argument set change.
-		const sources = yield actions.getDynamicSources( postTypes, previewPostID, randomAttr );
+		const sources = yield actions.getDynamicSources( postTypes, previewPostID, randomAttr, viewId );
 		yield actions.setDynamicSources( sources );
 	},
 };

@@ -2,9 +2,8 @@
 
 namespace Toolset\DynamicSources\ToolsetSources;
 
-use function Patchwork\Config\get;
-use Toolset\DynamicSources\PostProviders\IdentityPost;
-use Toolset\DynamicSources\SourceContext;
+use Toolset\DynamicSources\PostProvider;
+use Toolset\DynamicSources\SourceContext\SourceContext;
 
 /**
  * Main controller to initialize dynamic content sources from Toolset.
@@ -44,7 +43,7 @@ class Main {
 	public function initialize() {
 
 		// We won't do anything if we don't have Types.
-		if( ! apply_filters( 'types_is_active', false ) ) {
+		if ( ! apply_filters( 'types_is_active', false ) ) {
 			return;
 		}
 
@@ -80,7 +79,11 @@ class Main {
 			function( $cache, $post_id ) {
 				global $post;
 
-				$post_id = $post_id ?: $post->ID;
+				if ( ! $post ) {
+					return $cache;
+				}
+
+				$post_id = $post_id ? $post_id : $post->ID;
 
 				if ( ! $post_id ) {
 					return $cache;
@@ -88,6 +91,7 @@ class Main {
 
 				do_action( 'toolset/dynamic_sources/actions/register_sources' );
 
+				/** @var PostProvider[] $post_providers */
 				$post_providers = apply_filters( 'toolset/dynamic_sources/filters/get_post_providers', array() );
 				foreach ( $post_providers as $post_provider ) {
 					global $post;
@@ -130,29 +134,70 @@ class Main {
 		);
 	}
 
-
+	/**
+	 * @param SourceContext $source_context
+	 *
+	 * @return array
+	 */
 	private function get_toolset_post_providers( SourceContext $source_context ) {
-
 		$post_providers = [];
 
-		foreach( $source_context->get_post_types() as $current_post_type_slug ) {
-			$relationships = $this->relationship_service->get_relationships_acceptable_for_sources( $current_post_type_slug );
+		foreach ( $source_context->get_post_types() as $current_post_type_slug ) {
+			$relationships = $this
+				->relationship_service
+				->get_relationships_acceptable_for_sources( $current_post_type_slug, $source_context );
 
 			foreach ( $relationships as $post_relationship ) {
-				$post_provider = new RelatedPostProvider(
-					$post_relationship,
-					$this->relationship_service->get_role_from_name(
-						$post_relationship->get_role_by_post_type(
-							$post_relationship->get_other_post_type( $current_post_type_slug )
-						)
-					),
-					$this->relationship_service
-				);
+				// A relationship can be M2M, but turned into O2M by a Views filter, so we can offer intermediary.
+				if ( $post_relationship->is_views_filtered_o_2_m() ) {
+					$intermediary = new RelatedPostProvider(
+						$post_relationship,
+						$this->relationship_service->get_role_from_name(
+							'intermediary',
+							$post_relationship->get_slug()
+						),
+						$this->relationship_service
+					);
+					$post_providers[ $intermediary->get_unique_slug() ] = $intermediary;
+				} elseif ( $post_relationship->is_intermediary() ) {
+					// Here we need to account for the fact that an intermediary post has 2 related providers to offer.
+					$parent_provider = new RelatedPostProvider(
+						$post_relationship,
+						$this->relationship_service->get_role_from_name(
+							$post_relationship->get_role_by_post_type(
+								$post_relationship->get_post_type_by_role( 'parent' )
+							)
+						),
+						$this->relationship_service
+					);
+					$post_providers[ $parent_provider->get_unique_slug() ] = $parent_provider;
 
-				$post_providers[ $post_provider->get_unique_slug() ] = $post_provider;
+					$child_provider = new RelatedPostProvider(
+						$post_relationship,
+						$this->relationship_service->get_role_from_name(
+							$post_relationship->get_role_by_post_type(
+								$post_relationship->get_post_type_by_role( 'child' )
+							)
+						),
+						$this->relationship_service
+					);
+					$post_providers[ $child_provider->get_unique_slug() ] = $child_provider;
+				} else {
+					$post_provider = new RelatedPostProvider(
+						$post_relationship,
+						$this->relationship_service->get_role_from_name(
+							$post_relationship->get_role_by_post_type(
+								$post_relationship->get_other_post_type( $current_post_type_slug )
+							),
+							$post_relationship->get_slug()
+						),
+						$this->relationship_service
+					);
+
+					$post_providers[ $post_provider->get_unique_slug() ] = $post_provider;
+				}
 			}
 		}
-
 		return $post_providers;
 	}
 }

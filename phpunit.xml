@@ -20,6 +20,7 @@
 				<directory>./tests</directory>
 				<directory>./vendor</directory>
 				<directory>./node_modules</directory>
+				<file>./server/ds-instance.php</file>
 			</exclude>
 		</whitelist>
 	</filter>

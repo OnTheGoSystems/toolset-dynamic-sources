@@ -36,9 +36,8 @@ class PostSelector extends Component {
 		}
 
 		const $editor = jQuery( '#editor.block-editor__container' );
-
 		if ( $editor.length === 0 ) {
-			// This most probably means we're in the classic editor already.
+			setTimeout( partial( deferCallback, deferCallback ), 1 );
 			return;
 		}
 

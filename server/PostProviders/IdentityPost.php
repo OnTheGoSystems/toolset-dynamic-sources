@@ -40,9 +40,23 @@ class IdentityPost implements PostProvider {
 	 * @return string
 	 */
 	public function get_label() {
-		return __( 'Current post', 'wpv-views' );
+		return sprintf(
+			__( 'Current %s', 'wpv-views' ),
+			$this->get_post_label()
+		);
 	}
 
+	/**
+	 * @return string
+	 */
+	private function get_post_label() {
+		$post_type_object = get_post_type_object( reset( $this->post_type_slugs ) );
+
+		if ( ! $post_type_object ) {
+			return __( 'Post', 'wpv-views' );
+		}
+		return $post_type_object->labels->singular_name;
+	}
 
 	/**
 	 * @inheritdoc
@@ -60,7 +74,7 @@ class IdentityPost implements PostProvider {
 	/**
 	 * @inheritdoc
 	 *
-	 * @return string
+	 * @return string[]
 	 */
 	public function get_post_types() {
 		return $this->post_type_slugs;

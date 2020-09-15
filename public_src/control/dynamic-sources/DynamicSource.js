@@ -202,7 +202,9 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicPostProviderSelect = () => {
-		const { dynamicSourcesEligibleAttribute, clientId, hideLabels } = this.props;
+		const { dynamicSourcesEligibleAttribute, clientId } = this.props;
+
+		const hideLabels = this.props.hideLabels || true;
 
 		if ( ! dynamicSourcesEligibleAttribute.postProviderObject ) {
 			dynamicSourcesEligibleAttribute.selectPostProviderChangedCallback( this.DEFAULT_POST_PROVIDER );
@@ -220,7 +222,7 @@ class DynamicSourceClass extends Component {
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Source', 'wpv-views' ) };
 
 		return <Fragment key="post-provider-select">
-			<BaseControl label={ hideLabels ? false : __( 'Post Source', 'wpv-views' ) } >
+			<BaseControl label={ ! hideLabels ? false : __( 'Post Source', 'wpv-views' ) } >
 				<Select
 					options={ filteredPostProviders }
 					styles={ this.customStyles }
@@ -281,7 +283,8 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicSourceSelect = () => {
-		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
+		const { dynamicSourcesEligibleAttribute } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 		const sources = this.filterSources();
 		const selectedSource = find( this.ungroupedSources, { value: dynamicSourcesEligibleAttribute.sourceObject } ) || null;
 
@@ -291,7 +294,7 @@ class DynamicSourceClass extends Component {
 		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Source', 'wpv-views' ) };
 
 		return <Fragment key="dynamic-source-select">
-			<BaseControl label={ hideLabels ? false : __( 'Source', 'wpv-views' ) } >
+			<BaseControl label={ ! hideLabels ? false : __( 'Source', 'wpv-views' ) } >
 				<Select
 					isClearable
 					options={ sources }
@@ -331,16 +334,19 @@ class DynamicSourceClass extends Component {
 	 * @returns {JSX}
 	 */
 	renderDynamicSourceSearchPost = () => {
-		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
+		const { dynamicSourcesEligibleAttribute } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 
 		if ( dynamicSourcesEligibleAttribute.postProviderObject !== '__custom_post' ) {
 			return null;
 		}
-		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Post Name', 'wpv-views' ) };
+		const placeholder = ! hideLabels ? {} : { placeholder: __( 'Start typing to search...', 'wpv-views' ) };
 
 		return <Fragment key="dynamic-custom-post-select">
-			<BaseControl label={ hideLabels ? false : __( 'Post Name', 'wpv-views' ) } >
+			<BaseControl label={ ! hideLabels ? false : __( 'Post', 'wpv-views' ) } >
 				<AsyncSelect
+					isClearable
+					defaultOptions
 					cacheOptions
 					loadOptions={ searchPost.bind( this ) }
 					onChange={ this.customPostSelectChanged }
@@ -391,7 +397,8 @@ class DynamicSourceClass extends Component {
 	};
 
 	renderDynamicSourceFieldsSelect = () => {
-		const { dynamicSourcesEligibleAttribute, hideLabels } = this.props;
+		const { dynamicSourcesEligibleAttribute } = this.props;
+		const hideLabels = this.props.hideLabels || true;
 
 		if ( dynamicSourcesEligibleAttribute.sourceObject ) {
 			// Getting the latest instance of fields from the JS object "ungroupedSources" created when filtering the
@@ -423,7 +430,7 @@ class DynamicSourceClass extends Component {
 
 			const placeholder = ! hideLabels ? {} : { placeholder: __( 'Select a Field', 'wpv-views' ) };
 
-			return <BaseControl label={ hideLabels ? false : __( 'Field', 'wpv-views' ) } key="dynamic-source-fields-select">
+			return <BaseControl label={ ! hideLabels ? false : __( 'Field', 'wpv-views' ) } key="dynamic-source-fields-select">
 				<Select
 					isClearable
 					options={ fields }

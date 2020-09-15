@@ -85,9 +85,9 @@ class PostTaxonomies extends AbstractSource {
 	/**
 	 * Gets the content of the Source.
 	 *
-	 * @param null|string $field
+	 * @param null|string $taxonomy
 	 * @param array|null  $attributes Extra attributes coming from shortcode
-	 * @return array The content of the Source.
+	 * @return array|string The content of the Source.
 	 */
 	public function get_content( $taxonomy = null, $attributes = null ) {
 		$result = [];

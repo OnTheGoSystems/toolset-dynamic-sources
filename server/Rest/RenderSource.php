@@ -41,6 +41,9 @@ class RenderSource {
 				'field' => array(
 					'sanitize_callback' => 'sanitize_text_field',
 				),
+				'view-id' => array(
+					'sanitize_callback' => 'sanitize_text_field',
+				),
 			),
 			'permission_callback' => function( $request ) {
 				$post = $request->get_param( 'post' );
@@ -67,17 +70,18 @@ class RenderSource {
 	 */
 	public function render_source( \WP_REST_Request $request ) {
 		$this->request = $request;
-		$post_provider = $request->get_param('provider' );
-		$post_id = $request->get_param('post' );
+		$post_provider = $request->get_param( 'provider' );
+		$post_id = $request->get_param( 'post' );
 		$source = $request->get_param( 'source' );
 		$field = $request->get_param( 'field' );
+		$view_id = $request->get_param( 'view-id' );
 
 		add_filter( 'toolset/dynamic_sources/filters/register_post_providers', array( $this, 'get_post_providers' ), 2000 );
 
 		global $post;
 		$post = get_post( $post_id );
 		setup_postdata( $post );
-		do_action( 'toolset/dynamic_sources/actions/register_sources' );
+		do_action( 'toolset/dynamic_sources/actions/register_sources', $view_id );
 
 		$content = '';
 

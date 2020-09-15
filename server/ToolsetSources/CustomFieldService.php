@@ -4,6 +4,7 @@ namespace Toolset\DynamicSources\ToolsetSources;
 
 
 use Toolset\DynamicSources\DynamicSources;
+use OTGS\Toolset\Common\PublicAPI as toolsetAPI;
 
 /**
  * Layer for communicating with Toolset Common regarding custom fields and field groups.
@@ -26,29 +27,25 @@ class CustomFieldService {
 	 * @return string[]
 	 */
 	public function get_group_slugs_by_type( $post_type_slug ) {
-		/*$field_groups = apply_filters( 'types_query_groups', [], [
+		$field_groups = toolset_get_field_groups( [
 			'domain' => 'posts',
 			'is_active' => true,
 			'purpose' => '*',
-
-		] )*/
-
-		$field_groups = \Toolset_Field_Group_Post_Factory::get_instance()
-			->get_groups_by_post_type( $post_type_slug );
+			'assigned_to_post_type' => $post_type_slug
+		] );
 
 		// If $post_type_slug is the slug of an RFG, the field group will be loaded using an alternative method.
 		// The RFG field group has "hidden" status, so this is why "get_groups_by_post_type" cannot load it.
-		$maybe_rfg_field_group = \Toolset_Field_Group_Post_Factory::get_instance()->load_field_group( $post_type_slug );
+		$maybe_rfg_field_group = toolset_get_field_group( $post_type_slug, toolsetAPI\ElementDomain\POSTS );
 		if (
-			$maybe_rfg_field_group &&
-			is_callable( array( $maybe_rfg_field_group, 'get_purpose' ) ) &&
-			\Toolset_Field_Group_Post::PURPOSE_FOR_REPEATING_FIELD_GROUP === $maybe_rfg_field_group->get_purpose()
+			$maybe_rfg_field_group
+		 	&& toolsetAPI\CustomFieldGroupPurpose\FOR_REPEATING_FIELD_GROUP === $maybe_rfg_field_group->get_purpose()
 		) {
 			// ... the $post_type_slug is the slug of an RFG, so let's append this to the $fields_groups array.
  			$field_groups[] = $maybe_rfg_field_group;
 		}
 
-		return array_map( function ( \Toolset_Field_Group_Post $field_group ) {
+		return array_map( function ( toolsetAPI\CustomFieldGroup $field_group ) {
 			return $field_group->get_slug();
 		}, $field_groups );
 	}
@@ -89,7 +86,7 @@ class CustomFieldService {
 	 * @return FieldGroupModel
 	 */
 	public function create_group_model( $field_group_slug ) {
-		$field_group = \Toolset_Field_Group_Post_Factory::get_instance()->load_field_group( $field_group_slug );
+		$field_group = toolset_get_field_group( $field_group_slug, toolsetAPI\ElementDomain\POSTS );
 
 		if( null === $field_group ) {
 			return null;
@@ -99,30 +96,26 @@ class CustomFieldService {
 			'fields' => array(),
 			'repeating_groups' => array(),
 		);
-		$factory = \Toolset_Field_Definition_Factory_Post::get_instance();
-		$rfg_service = new \Types_Field_Group_Repeatable_Service();
-		$slugs = $field_group->get_field_slugs();
 
-		foreach ( $slugs as $slug ) {
-			$field_definition = $factory->load_field_definition( $slug );
-			$repeatable_group = $rfg_service->get_object_from_prefixed_string( $slug );
-			if (
-				null !== $field_definition &&
-				$field_definition->is_managed_by_types()
-			) {
+		foreach ( $field_group->get_field_definitions() as $field_definition ) {
+			if ( null !== $field_definition ) {
 				$field_group_fields['fields'][] = $field_definition;
-			} elseif ( $repeatable_group ) {
-				$repeatable_group_field_slugs = $repeatable_group->get_field_slugs();
-				if ( ! empty( $repeatable_group_field_slugs ) ) {
-					$field_group_fields['repeating_groups'][] = $repeatable_group;
+			} else {
+				/** @var toolsetAPI\CustomFieldGroup|null $repeatable_group */
+				$repeatable_group = apply_filters( 'types_get_rfg_from_prexied_string', null, $field_definition->get_slug() );
+
+				if ( $repeatable_group ) {
+					if ( ! empty( $repeatable_group->get_field_definitions() ) ) {
+						$field_group_fields['repeating_groups'][] = $repeatable_group;
+					}
 				}
 			}
 		}
 
 		$elligible_field_definitions = array_filter(
 			$field_group_fields['fields'],
-			function( \Toolset_Field_Definition $field_definition ) {
-				if( ! $this->is_field_type_supported( $field_definition->get_type()->get_slug() ) ) {
+			function( toolsetAPI\CustomFieldDefinition $field_definition ) {
+				if( ! $this->is_field_type_supported( $field_definition->get_type_slug() ) ) {
 					return false;
 				}
 
@@ -132,15 +125,27 @@ class CustomFieldService {
 
 		$field_models = array_values(
 			array_map(
-				function( \Toolset_Field_Definition $field_definition ) {
-					$definition = $field_definition->get_definition_array();
+				function( toolsetAPI\CustomFieldDefinition $field_definition ) {
+
+					// Workaround because raw definition array has been used here but we
+					// cannot expose it through the public API in this form. And providing
+					// it in a structured way will require quite a lot of work, so for now,
+					// we just do this little hack.
+					if ( is_subclass_of( $field_definition, 'Toolset_Field_Definition' ) ) {
+						/** @var \Toolset_Field_Definition $field_definition */
+						$definition_array = $field_definition->get_definition_array();
+						$raw_field_options = isset( $definition_array[ 'data' ][ 'options' ] ) ? $definition_array[ 'data' ][ 'options' ] : null;
+					} else {
+						$raw_field_options = null;
+					}
+
 					return new FieldModel(
 						$field_definition->get_slug(),
 						$field_definition->get_name(),
-						$field_definition->get_type()->get_slug(),
-						$this->get_categories_for_field_type( $field_definition->get_type()->get_slug() ),
-						isset( $definition[ 'data' ][ 'options' ] ) ? $definition[ 'data' ][ 'options' ] : null,
-						$field_definition->get_is_repetitive()
+						$field_definition->get_type_slug(),
+						$this->get_categories_for_field_type( $field_definition->get_type_slug() ),
+						$raw_field_options,
+						$field_definition->is_repeatable()
 					);
 				},
 				$elligible_field_definitions
@@ -149,11 +154,11 @@ class CustomFieldService {
 
 		$rfgs_as_field_models = array_values(
 			array_map(
-				function( \Types_Field_Group_Repeatable $rfg_definition ) {
+				function( toolsetAPI\CustomFieldGroup $rfg_definition ) {
 					$field_type = 'rfg';
 					return new FieldModel(
 						$rfg_definition->get_slug(),
-						$rfg_definition->get_name(),
+						$rfg_definition->get_display_name(),
 						$field_type,
 						$this->get_categories_for_field_type( $field_type ),
 						null,
@@ -173,9 +178,9 @@ class CustomFieldService {
 
 		return new FieldGroupModel(
 			$field_group_slug,
-			$field_group->get_name(),
+			$field_group->get_display_name(),
 			array_merge( $field_models, $rfgs_as_field_models ),
-			\Toolset_Field_Group_Post::PURPOSE_FOR_REPEATING_FIELD_GROUP === $field_group->get_purpose()
+			toolsetAPI\CustomFieldGroupPurpose\FOR_REPEATING_FIELD_GROUP === $field_group->get_purpose()
 		);
 	}
 
@@ -213,24 +218,12 @@ class CustomFieldService {
 		$number = array_merge( $text, [ DynamicSources::NUMBER_CATEGORY ] );
 		$url = array_merge( $text, [ DynamicSources::URL_CATEGORY ] );
 		switch ( $field_type ) {
-			case 'textfield':
-			case 'email':
-			case 'radio':
-			case 'select':
-			case 'checkbox':
-			case 'checkboxes':
-			case 'embed':
-			case 'phone':
-			case 'textarea':
-			case 'wysiwyg':
-			case 'colorpicker':
-				return $text;
 			case 'date':
 				return array_merge( $text, [ DynamicSources::DATE_CATEGORY ] );
 			case 'numeric':
 				return $number;
 			case 'url':
-				return $url;
+				return array_merge( $url, [ DynamicSources::EMBED_CATEGORY ] );
 			case 'image':
 				return array_merge( $url, [ DynamicSources::IMAGE_CATEGORY ] );
 			case 'audio':
@@ -248,6 +241,21 @@ class CustomFieldService {
 					DynamicSources::AUDIO_CATEGORY,
 					DynamicSources::TEXT_CATEGORY,
 				];
+			case 'embed':
+			case 'textfield':
+				return [
+					DynamicSources::TEXT_CATEGORY,
+					DynamicSources::EMBED_CATEGORY,
+				];
+			case 'email':
+			case 'radio':
+			case 'select':
+			case 'checkbox':
+			case 'checkboxes':
+			case 'phone':
+			case 'textarea':
+			case 'wysiwyg':
+			case 'colorpicker':
 			default:
 				return $text;
 		}

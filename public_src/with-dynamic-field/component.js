@@ -1,7 +1,7 @@
 // WordPress dependencies
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Component, Fragment } from '@wordpress/element';
-import { addAction, applyFilters } from '@wordpress/hooks';
+import { addAction, removeAction, hasAction, applyFilters } from '@wordpress/hooks';
 import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
@@ -11,6 +11,11 @@ import { fetchDynamicContent } from '../control/dynamic-sources/utils/fetchData'
 import PostPreview from '../control/post-preview/post-preview';
 import getDifferenceOfObjects from '../utils/object-get-difference';
 import assureString from '../utils/assure-string';
+
+// External Dependencies
+import { includes } from 'lodash';
+
+const { toolsetDynamicSourcesScriptData: i18n } = window;
 
 const DEFAULT_FIELD_ATTRIBUTES = {
 	isActive: false,
@@ -31,26 +36,31 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 			this.dynamicFieldReset = this.dynamicFieldReset.bind( this );
 			this.dynamicFieldNoDataRender = this.dynamicFieldNoDataRender.bind( this );
 			this.requestUpdateContent = this.requestUpdateContent.bind( this );
-			this.doUpdateContent = this.doUpdateContent.bind( this );
 			this.requestFieldToggle = this.requestFieldToggle.bind( this );
 			this.requestFieldAttributeUpdate = this.requestFieldAttributeUpdate.bind( this );
 			this.doFieldsAttributeUpdate = this.doFieldsAttributeUpdate.bind( this );
 
 			this.currentPostId = select( 'core/editor' ).getCurrentPostId();
 
-			this.updateContentDebounce = null;
-			this.updateFieldsAttributesDebounce = null;
 			this.attributesUpdateRequired = false;
 		}
 
 		componentDidMount() {
 			this.requestUpdateContent();
 
+			if ( hasAction( 'tb.dynamicSources.actions.cache.updated', 'with-dynamic-field-hoc-' + this.props.clientId ) ) {
+				return;
+			}
+
 			addAction(
 				'tb.dynamicSources.actions.cache.updated',
-				'toolset-blocks',
+				'with-dynamic-field-hoc-' + this.props.clientId,
 				this.requestUpdateContent
 			);
+		}
+
+		componentWillUnmount() {
+			removeAction( 'tb.dynamicSources.actions.cache.updated', 'with-dynamic-field-hoc-' + this.props.clientId );
 		}
 
 		dynamicFieldsRegister( fields, dynamicRootAttributeKey = 'dynamic' ) {
@@ -164,6 +174,9 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 				},
 				category: field.category || 'text',
 				bannedCategories: field.bannedCategories || [],
+				allowRepeatable: field.allowRepeatable || false,
+				forceRepeatable: field.forceRepeatable || false,
+				returnType: 'anything',
 			};
 		}
 
@@ -181,7 +194,12 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 					return false;
 				}
 			} else {
-				let content = data && data.sourceContent ? assureString( data.sourceContent ) : '';
+				let content = data && data.sourceContent ? data.sourceContent : '';
+
+				// When the field does not allow repeatable make sure a string is returned.
+				if ( field.allowRepeatable === false ) {
+					content = assureString( content );
+				}
 
 				if ( field.parse ) {
 					switch ( field.parse ) {
@@ -192,6 +210,10 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 							content = parseFloat( content );
 							break;
 					}
+				}
+
+				if ( field.returnType === 'array' && !! content && ! Array.isArray( content ) ) {
+					content = [ content ];
 				}
 
 				if ( returnValue ) {
@@ -260,18 +282,29 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 			} );
 		}
 
-		requestUpdateContent() {
-			clearTimeout( this.updateContentDebounce );
-			this.updateContentDebounce = setTimeout( this.doUpdateContent, 500 );
-		}
+		maybeGetParentViewBlock = ( blockId ) => {
+			const { getBlock, getBlockRootClientId } = select( 'core/block-editor' );
+			let result = null,
+				currentBlockId = blockId;
 
-		doUpdateContent() {
+			do {
+				currentBlockId = getBlockRootClientId( currentBlockId );
+				if ( !! currentBlockId ) {
+					const block = getBlock( currentBlockId );
+					if ( includes( [ 'toolset-views/view-editor', 'toolset-views/wpa-editor' ], block.name ) ) {
+						result = block;
+					}
+				}
+			} while ( !! currentBlockId );
+
+			return result;
+		};
+
+		requestUpdateContent() {
 			const {
 				currentPostId,
 				props: { setAttributes, clientId },
 			} = this;
-
-			const { toolsetDynamicSourcesScriptData: i18n } = window;
 
 			const previewPostId = applyFilters( 'tb.dynamicSources.filters.adjustPreviewPostID', select( i18n.dynamicSourcesStore ).getPreviewPost(), clientId );
 			const postId = previewPostId || currentPostId;
@@ -290,10 +323,26 @@ export default createHigherOrderComponent( ( WrappedComponent ) => {
 				}
 
 				const finalProvider = !! customPost ? customPost.value : provider;
+				const parentViewBlock = this.maybeGetParentViewBlock( clientId );
+				let viewId = null;
+				if ( !! parentViewBlock ) {
+					const viewGeneralSettings = select( parentViewBlock.attributes.reduxStoreId ).getGeneral();
+					viewId = viewGeneralSettings.id;
+				}
 
-				const response = await fetchDynamicContent( finalProvider, postId, source, field ? field : null );
-				const updateAttributes = this.updateFieldContent( this.fields[ key ], response, true, source );
-
+				const response = await fetchDynamicContent(
+					finalProvider,
+					postId,
+					source,
+					field ? field : null,
+					viewId
+				);
+				const updateAttributes = this.updateFieldContent(
+					this.fields[ key ],
+					response,
+					true,
+					source
+				);
 				if ( updateAttributes !== false ) {
 					setAttributes( updateAttributes );
 				}

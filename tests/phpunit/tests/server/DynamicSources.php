@@ -1,6 +1,8 @@
 <?php
 
-namespace OTGS\Toolset\DynamicSources\Tests\Integrations;
+namespace OTGS\Toolset\DynamicSources\Tests;
+
+use Toolset\DynamicSources\DynamicSources;
 
 class DynamicSourcesTest extends \OTGS\Toolset\DynamicSources\TestCase {
 	public function provide_boolean() {
@@ -22,7 +24,7 @@ class DynamicSourcesTest extends \OTGS\Toolset\DynamicSources\TestCase {
 			'return' => $initialized ? 2 : 1,
 		) );
 
-		$subject = new \Toolset\DynamicSources\DynamicSources();
+		$subject = new DynamicSources();
 
 		$this->initialize_sequence( $subject, $initialized );
 
@@ -142,15 +144,6 @@ class DynamicSourcesTest extends \OTGS\Toolset\DynamicSources\TestCase {
 				-1
 			)
 		);
-
-		call_user_func_array(
-			$method,
-			array(
-				'toolset/dynamic_sources/filters/register_post_providers',
-				array( $subject, 'set_custom_post_provider' ),
-				10000
-			)
-		);
 	}
 
 	private function initialize_actions( $subject, $initialized ) {
@@ -227,7 +220,7 @@ class DynamicSourcesTest extends \OTGS\Toolset\DynamicSources\TestCase {
 	 * @test
 	 */
 	public function it_registers_dynamic_sources_for_shortcode_render() {
-		$subject = new \Toolset\DynamicSources\DynamicSources();
+		$subject = new DynamicSources();
 		$post = 1;
 		$post_type = 'post';
 
@@ -243,5 +236,27 @@ class DynamicSourcesTest extends \OTGS\Toolset\DynamicSources\TestCase {
 		\WP_Mock::expectAction( 'toolset/dynamic_sources/actions/register_sources' );
 
 		$subject->dynamic_shortcode_render( array() );
+	}
+
+	/**
+	 * Tests default value
+	 *
+	 * @test
+	 */
+	public function it_dynamic_container_shortcode_render_default_value() {
+		$subject = new DynamicSources();
+
+		\WP_Mock::userFunction( 'shortcode_atts' )->andReturnUsing(
+			function( $defaults, $atts ) {
+				return array_merge( $defaults, $atts );
+			}
+		);
+
+		\WP_Mock::passthruFunction( 'sanitize_text_field' );
+		\WP_Mock::passthruFunction( 'do_shortcode' );
+
+		// 0 shouldn't be considered as empty
+		$default_value = '0';
+		$subject->dynamic_container_shortcode_render( array( 'default-value' => $default_value ), '' );
 	}
 }

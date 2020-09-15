@@ -53,6 +53,7 @@ class SearchPost {
 		} else {
 			$search = $request->get_param( 's' );
 			$posts = get_posts( array(
+				'suppress_filters' => false,
 				's' => $search,
 				'post_count' => 5,
 				'post_type' => array_keys( get_post_types( array( 'public' => true ), 'names' ) ),

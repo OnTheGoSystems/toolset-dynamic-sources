@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "700ad6cb358dc18463b007d7f4a73e54",
+    "content-hash": "bab55447c488e773efe30a36c38b3462",
     "packages": [
         {
             "name": "rdlowrey/auryn",
@@ -151,6 +151,153 @@
                 "testing"
             ],
             "time": "2017-08-01T11:52:57+00:00"
+        },
+        {
+            "name": "automattic/phpcs-neutron-standard",
+            "version": "v1.5.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/phpcs-neutron-standard.git",
+                "reference": "7f259cdef7a57d3152b868c96d51740cb1055c3f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/phpcs-neutron-standard/zipball/7f259cdef7a57d3152b868c96d51740cb1055c3f",
+                "reference": "7f259cdef7a57d3152b868c96d51740cb1055c3f",
+                "shasum": ""
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
+                "limedeck/phpunit-detailed-printer": "^3.1",
+                "phpunit/phpunit": "^6.4",
+                "sirbrillig/phpcs-variable-analysis": "^2.0.1",
+                "squizlabs/php_codesniffer": "3.3.0"
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Payton Swick",
+                    "email": "payton@foolord.com"
+                }
+            ],
+            "description": "A set of phpcs sniffs for modern php development.",
+            "time": "2018-06-13T20:12:10+00:00"
+        },
+        {
+            "name": "automattic/vipwpcs",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/VIP-Coding-Standards.git",
+                "reference": "03e75ddd0261b675dece60fb67fc2e9c6af4ad35"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/VIP-Coding-Standards/zipball/03e75ddd0261b675dece60fb67fc2e9c6af4ad35",
+                "reference": "03e75ddd0261b675dece60fb67fc2e9c6af4ad35",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4",
+                "squizlabs/php_codesniffer": "^3.5.5",
+                "wp-coding-standards/wpcs": "^2.3"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7",
+                "phpcompatibility/php-compatibility": "^9",
+                "phpunit/phpunit": "^4 || ^5 || ^6 || ^7"
+            },
+            "suggest": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7 || This Composer plugin will manage the PHPCS 'installed_paths' automatically."
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/Automattic/VIP-Coding-Standards/graphs/contributors"
+                }
+            ],
+            "description": "PHP_CodeSniffer rules (sniffs) to enforce WordPress VIP minimum coding conventions",
+            "keywords": [
+                "phpcs",
+                "standards",
+                "wordpress"
+            ],
+            "time": "2020-07-07T07:48:04+00:00"
+        },
+        {
+            "name": "dealerdirect/phpcodesniffer-composer-installer",
+            "version": "v0.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Dealerdirect/phpcodesniffer-composer-installer.git",
+                "reference": "8001af8eb107fbfcedc31a8b51e20b07d85b457a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Dealerdirect/phpcodesniffer-composer-installer/zipball/8001af8eb107fbfcedc31a8b51e20b07d85b457a",
+                "reference": "8001af8eb107fbfcedc31a8b51e20b07d85b457a",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0",
+                "php": "^5.3|^7",
+                "squizlabs/php_codesniffer": "^2|^3"
+            },
+            "require-dev": {
+                "composer/composer": "*",
+                "phpcompatibility/php-compatibility": "^9.0",
+                "sensiolabs/security-checker": "^4.1.0"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\Plugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Dealerdirect\\Composer\\Plugin\\Installers\\PHPCodeSniffer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Franck Nijhof",
+                    "email": "franck.nijhof@dealerdirect.com",
+                    "homepage": "http://www.frenck.nl",
+                    "role": "Developer / IT Manager"
+                }
+            ],
+            "description": "PHP_CodeSniffer Standards Composer Installer Plugin",
+            "homepage": "http://www.dealerdirect.com",
+            "keywords": [
+                "PHPCodeSniffer",
+                "PHP_CodeSniffer",
+                "code quality",
+                "codesniffer",
+                "composer",
+                "installer",
+                "phpcs",
+                "plugin",
+                "qa",
+                "quality",
+                "standard",
+                "standards",
+                "style guide",
+                "stylecheck",
+                "tests"
+            ],
+            "time": "2020-01-29T20:22:20+00:00"
         },
         {
             "name": "doctrine/instantiator",
@@ -447,17 +594,65 @@
             "time": "2017-10-19T19:58:43+00:00"
         },
         {
-            "name": "otgs/unit-tests-framework",
-            "version": "1.2.5",
+            "name": "otgs/toolset-coding-standards",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/OnTheGoSystems/otgs-unit-tests-framework.git",
-                "reference": "ac74845b1c3a7a64345625d4ab2421a71db14adc"
+                "url": "https://github.com/OnTheGoSystems/toolset-coding-standards.git",
+                "reference": "1b69fd710f965b3a37f9c5415345151deccc6898"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/OnTheGoSystems/otgs-unit-tests-framework/zipball/ac74845b1c3a7a64345625d4ab2421a71db14adc",
-                "reference": "ac74845b1c3a7a64345625d4ab2421a71db14adc",
+                "url": "https://api.github.com/repos/OnTheGoSystems/toolset-coding-standards/zipball/1b69fd710f965b3a37f9c5415345151deccc6898",
+                "reference": "1b69fd710f965b3a37f9c5415345151deccc6898",
+                "shasum": ""
+            },
+            "require": {
+                "automattic/phpcs-neutron-standard": "^1.5",
+                "automattic/vipwpcs": "^2.0",
+                "sirbrillig/phpcs-variable-analysis": "^2.1",
+                "wp-coding-standards/wpcs": "*"
+            },
+            "require-dev": {
+                "roave/security-advisories": "dev-master"
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Štětina",
+                    "email": "jan.s@onthegosystems.com"
+                },
+                {
+                    "name": "OnTheGoSystems",
+                    "email": "hello@wpml.org",
+                    "homepage": "https://onthegosystems.com"
+                }
+            ],
+            "description": "A set of phpcs rules used in Toolset",
+            "homepage": "https://github.com/OnTheGoSystems/toolset-coding-standards",
+            "keywords": [
+                "compatibility",
+                "phpcs",
+                "standards"
+            ],
+            "time": "2020-05-11T10:43:31+00:00"
+        },
+        {
+            "name": "otgs/unit-tests-framework",
+            "version": "1.2.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/OnTheGoSystems/otgs-unit-tests-framework.git",
+                "reference": "a88eb037eeee00c532b6ff912f380fe967d74646"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/OnTheGoSystems/otgs-unit-tests-framework/zipball/a88eb037eeee00c532b6ff912f380fe967d74646",
+                "reference": "a88eb037eeee00c532b6ff912f380fe967d74646",
                 "shasum": ""
             },
             "require": {
@@ -492,7 +687,167 @@
             "keywords": [
                 "phpunit"
             ],
-            "time": "2017-11-23T12:48:37+00:00"
+            "time": "2019-12-11T14:50:19+00:00"
+        },
+        {
+            "name": "phpcompatibility/php-compatibility",
+            "version": "9.3.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
+                "reference": "9fb324479acf6f39452e0655d2429cc0d3914243"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/9fb324479acf6f39452e0655d2429cc0d3914243",
+                "reference": "9fb324479acf6f39452e0655d2429cc0d3914243",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3",
+                "squizlabs/php_codesniffer": "^2.3 || ^3.0.2"
+            },
+            "conflict": {
+                "squizlabs/php_codesniffer": "2.6.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "~4.5 || ^5.0 || ^6.0 || ^7.0"
+            },
+            "suggest": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5 || This Composer plugin will sort out the PHPCS 'installed_paths' automatically.",
+                "roave/security-advisories": "dev-master || Helps prevent installing dependencies with known security issues."
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Wim Godden",
+                    "homepage": "https://github.com/wimg",
+                    "role": "lead"
+                },
+                {
+                    "name": "Juliette Reinders Folmer",
+                    "homepage": "https://github.com/jrfnl",
+                    "role": "lead"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/PHPCompatibility/PHPCompatibility/graphs/contributors"
+                }
+            ],
+            "description": "A set of sniffs for PHP_CodeSniffer that checks for PHP cross-version compatibility.",
+            "homepage": "http://techblog.wimgodden.be/tag/codesniffer/",
+            "keywords": [
+                "compatibility",
+                "phpcs",
+                "standards"
+            ],
+            "time": "2019-12-27T09:44:58+00:00"
+        },
+        {
+            "name": "phpcompatibility/phpcompatibility-paragonie",
+            "version": "1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie.git",
+                "reference": "b862bc32f7e860d0b164b199bd995e690b4b191c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityParagonie/zipball/b862bc32f7e860d0b164b199bd995e690b4b191c",
+                "reference": "b862bc32f7e860d0b164b199bd995e690b4b191c",
+                "shasum": ""
+            },
+            "require": {
+                "phpcompatibility/php-compatibility": "^9.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5",
+                "paragonie/random_compat": "dev-master",
+                "paragonie/sodium_compat": "dev-master"
+            },
+            "suggest": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5 || This Composer plugin will sort out the PHP_CodeSniffer 'installed_paths' automatically.",
+                "roave/security-advisories": "dev-master || Helps prevent installing dependencies with known security issues."
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Wim Godden",
+                    "role": "lead"
+                },
+                {
+                    "name": "Juliette Reinders Folmer",
+                    "role": "lead"
+                }
+            ],
+            "description": "A set of rulesets for PHP_CodeSniffer to check for PHP cross-version compatibility issues in projects, while accounting for polyfills provided by the Paragonie polyfill libraries.",
+            "homepage": "http://phpcompatibility.com/",
+            "keywords": [
+                "compatibility",
+                "paragonie",
+                "phpcs",
+                "polyfill",
+                "standards"
+            ],
+            "time": "2019-11-04T15:17:54+00:00"
+        },
+        {
+            "name": "phpcompatibility/phpcompatibility-wp",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP.git",
+                "reference": "41bef18ba688af638b7310666db28e1ea9158b2f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/41bef18ba688af638b7310666db28e1ea9158b2f",
+                "reference": "41bef18ba688af638b7310666db28e1ea9158b2f",
+                "shasum": ""
+            },
+            "require": {
+                "phpcompatibility/php-compatibility": "^9.0",
+                "phpcompatibility/phpcompatibility-paragonie": "^1.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5"
+            },
+            "suggest": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5 || This Composer plugin will sort out the PHP_CodeSniffer 'installed_paths' automatically.",
+                "roave/security-advisories": "dev-master || Helps prevent installing dependencies with known security issues."
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Wim Godden",
+                    "role": "lead"
+                },
+                {
+                    "name": "Juliette Reinders Folmer",
+                    "role": "lead"
+                }
+            ],
+            "description": "A ruleset for PHP_CodeSniffer to check for PHP cross-version compatibility issues in projects, while accounting for polyfills provided by WordPress.",
+            "homepage": "http://phpcompatibility.com/",
+            "keywords": [
+                "compatibility",
+                "phpcs",
+                "standards",
+                "wordpress"
+            ],
+            "time": "2019-08-28T14:22:28+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -642,38 +997,38 @@
         },
         {
             "name": "phpspec/prophecy",
-            "version": "1.8.0",
+            "version": "v1.10.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpspec/prophecy.git",
-                "reference": "4ba436b55987b4bf311cb7c6ba82aa528aac0a06"
+                "reference": "451c3cd1418cf640de218914901e51b064abb093"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/4ba436b55987b4bf311cb7c6ba82aa528aac0a06",
-                "reference": "4ba436b55987b4bf311cb7c6ba82aa528aac0a06",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/451c3cd1418cf640de218914901e51b064abb093",
+                "reference": "451c3cd1418cf640de218914901e51b064abb093",
                 "shasum": ""
             },
             "require": {
                 "doctrine/instantiator": "^1.0.2",
                 "php": "^5.3|^7.0",
-                "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0",
-                "sebastian/comparator": "^1.1|^2.0|^3.0",
-                "sebastian/recursion-context": "^1.0|^2.0|^3.0"
+                "phpdocumentor/reflection-docblock": "^2.0|^3.0.2|^4.0|^5.0",
+                "sebastian/comparator": "^1.2.3|^2.0|^3.0|^4.0",
+                "sebastian/recursion-context": "^1.0|^2.0|^3.0|^4.0"
             },
             "require-dev": {
-                "phpspec/phpspec": "^2.5|^3.2",
+                "phpspec/phpspec": "^2.5 || ^3.2",
                 "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.5 || ^7.1"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.8.x-dev"
+                    "dev-master": "1.10.x-dev"
                 }
             },
             "autoload": {
-                "psr-0": {
-                    "Prophecy\\": "src/"
+                "psr-4": {
+                    "Prophecy\\": "src/Prophecy"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -701,7 +1056,7 @@
                 "spy",
                 "stub"
             ],
-            "time": "2018-08-05T17:53:17+00:00"
+            "time": "2020-03-05T15:02:03+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -1095,17 +1450,64 @@
             "time": "2017-06-30T09:13:00+00:00"
         },
         {
+            "name": "psr/log",
+            "version": "1.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "0f73288fd15629204f9d42b7055f72dacbe811fc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/0f73288fd15629204f9d42b7055f72dacbe811fc",
+                "reference": "0f73288fd15629204f9d42b7055f72dacbe811fc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "Psr/Log/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2020-03-23T09:12:05+00:00"
+        },
+        {
             "name": "roave/security-advisories",
             "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "89f6e0f30ef66bfb06008d6d6ae6e7cc66a2e0f5"
+                "reference": "f693c37873d31bff5adb1279cb05a2f4ce5efb43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/89f6e0f30ef66bfb06008d6d6ae6e7cc66a2e0f5",
-                "reference": "89f6e0f30ef66bfb06008d6d6ae6e7cc66a2e0f5",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/f693c37873d31bff5adb1279cb05a2f4ce5efb43",
+                "reference": "f693c37873d31bff5adb1279cb05a2f4ce5efb43",
                 "shasum": ""
             },
             "conflict": {
@@ -1114,21 +1516,29 @@
                 "alterphp/easyadmin-extension-bundle": ">=1.2,<1.2.11|>=1.3,<1.3.1",
                 "amphp/artax": "<1.0.6|>=2,<2.0.6",
                 "amphp/http": "<1.0.1",
+                "amphp/http-client": ">=4,<4.4",
                 "api-platform/core": ">=2.2,<2.2.10|>=2.3,<2.3.6",
                 "asymmetricrypt/asymmetricrypt": ">=0,<9.9.99",
                 "aws/aws-sdk-php": ">=3,<3.2.1",
+                "bagisto/bagisto": "<0.1.5",
+                "barrelstrength/sprout-base-email": "<1.2.7",
+                "barrelstrength/sprout-forms": "<3.9",
+                "bolt/bolt": "<3.7.1",
                 "brightlocal/phpwhois": "<=4.2.5",
+                "buddypress/buddypress": "<5.1.2",
                 "bugsnag/bugsnag-laravel": ">=2,<2.0.2",
                 "cakephp/cakephp": ">=1.3,<1.3.18|>=2,<2.4.99|>=2.5,<2.5.99|>=2.6,<2.6.12|>=2.7,<2.7.6|>=3,<3.5.18|>=3.6,<3.6.15|>=3.7,<3.7.7",
                 "cart2quote/module-quotation": ">=4.1.6,<=4.4.5|>=5,<5.4.4",
                 "cartalyst/sentry": "<=2.1.6",
+                "centreon/centreon": "<18.10.8|>=19,<19.4.5",
+                "cesnet/simplesamlphp-module-proxystatistics": "<3.1",
                 "codeigniter/framework": "<=3.0.6",
                 "composer/composer": "<=1-alpha.11",
                 "contao-components/mediaelement": ">=2.14.2,<2.21.1",
                 "contao/core": ">=2,<3.5.39",
-                "contao/core-bundle": ">=4,<4.4.39|>=4.5,<4.7.5",
+                "contao/core-bundle": ">=4,<4.4.46|>=4.5,<4.8.6",
                 "contao/listing-bundle": ">=4,<4.4.8",
-                "contao/newsletter-bundle": ">=4,<4.1",
+                "datadog/dd-trace": ">=0.30,<0.30.2",
                 "david-garcia/phpwhois": "<=4.3.1",
                 "doctrine/annotations": ">=1,<1.2.7",
                 "doctrine/cache": ">=1,<1.3.2|>=1.4,<1.4.2",
@@ -1139,20 +1549,35 @@
                 "doctrine/mongodb-odm": ">=1,<1.0.2",
                 "doctrine/mongodb-odm-bundle": ">=2,<3.0.1",
                 "doctrine/orm": ">=2,<2.4.8|>=2.5,<2.5.1",
+                "dolibarr/dolibarr": "<11.0.4",
                 "dompdf/dompdf": ">=0.6,<0.6.2",
-                "drupal/core": ">=7,<7.67|>=8,<8.6.16|>=8.7,<8.7.1",
-                "drupal/drupal": ">=7,<7.67|>=8,<8.6.16|>=8.7,<8.7.1",
+                "drupal/core": ">=7,<7.72|>=8,<8.8.8|>=8.9,<8.9.1|>=9,<9.0.1",
+                "drupal/drupal": ">=7,<7.72|>=8,<8.8.8|>=8.9,<8.9.1|>=9,<9.0.1",
+                "endroid/qr-code-bundle": "<3.4.2",
+                "enshrined/svg-sanitize": "<0.13.1",
                 "erusev/parsedown": "<1.7.2",
-                "ezsystems/ezpublish-kernel": ">=5.3,<5.3.12.1|>=5.4,<5.4.13.1|>=6,<6.7.9.1|>=6.8,<6.13.5.1|>=7,<7.2.4.1|>=7.3,<7.3.2.1",
-                "ezsystems/ezpublish-legacy": ">=5.3,<5.3.12.6|>=5.4,<5.4.12.3|>=2011,<2017.12.4.3|>=2018.6,<2018.6.1.4|>=2018.9,<2018.9.1.3",
+                "ezsystems/demobundle": ">=5.4,<5.4.6.1",
+                "ezsystems/ezdemo-ls-extension": ">=5.4,<5.4.2.1",
+                "ezsystems/ezfind-ls": ">=5.3,<5.3.6.1|>=5.4,<5.4.11.1|>=2017.12,<2017.12.0.1",
+                "ezsystems/ezplatform": ">=1.7,<1.7.9.1|>=1.13,<1.13.5.1|>=2.5,<2.5.4",
+                "ezsystems/ezplatform-admin-ui": ">=1.3,<1.3.5|>=1.4,<1.4.6",
+                "ezsystems/ezplatform-admin-ui-assets": ">=4,<4.2",
+                "ezsystems/ezplatform-kernel": ">=1,<1.0.2.1",
+                "ezsystems/ezplatform-user": ">=1,<1.0.1",
+                "ezsystems/ezpublish-kernel": ">=5.3,<5.3.12.1|>=5.4,<5.4.14.2|>=6,<6.7.9.1|>=6.8,<6.13.6.3|>=7,<7.2.4.1|>=7.3,<7.3.2.1|>=7.5,<7.5.7.1",
+                "ezsystems/ezpublish-legacy": ">=5.3,<5.3.12.6|>=5.4,<5.4.14.1|>=2011,<2017.12.7.2|>=2018.6,<2018.6.1.4|>=2018.9,<2018.9.1.3|>=2019.3,<2019.3.4.2",
                 "ezsystems/repository-forms": ">=2.3,<2.3.2.1",
                 "ezyang/htmlpurifier": "<4.1.1",
                 "firebase/php-jwt": "<2",
                 "fooman/tcpdf": "<6.2.22",
                 "fossar/tcpdf-parser": "<6.2.22",
+                "friendsofsymfony/oauth2-php": "<1.3",
                 "friendsofsymfony/rest-bundle": ">=1.2,<1.2.2",
                 "friendsofsymfony/user-bundle": ">=1.2,<1.3.5",
+                "friendsoftypo3/mediace": ">=7.6.2,<7.6.5",
                 "fuel/core": "<1.8.1",
+                "getgrav/grav": "<1.7-beta.8",
+                "gos/web-socket-bundle": "<1.10.4|>=2,<2.6.1|>=3,<3.3",
                 "gree/jose": "<=2.2",
                 "gregwar/rst": "<1.0.3",
                 "guzzlehttp/guzzle": ">=4-rc.2,<4.2.4|>=5,<5.3.1|>=6,<6.2.1",
@@ -1160,6 +1585,7 @@
                 "illuminate/cookie": ">=4,<=4.0.11|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.42|>=5.6,<5.6.30",
                 "illuminate/database": ">=4,<4.0.99|>=4.1,<4.1.29",
                 "illuminate/encryption": ">=4,<=4.0.11|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.40|>=5.6,<5.6.15",
+                "illuminate/view": ">=7,<7.1.2",
                 "ivankristianto/phpwhois": "<=4.3",
                 "james-heinrich/getid3": "<1.9.9",
                 "joomla/session": "<1.3.1",
@@ -1167,15 +1593,25 @@
                 "kazist/phpwhois": "<=4.2.6",
                 "kreait/firebase-php": ">=3.2,<3.8.1",
                 "la-haute-societe/tcpdf": "<6.2.22",
-                "laravel/framework": ">=4,<4.0.99|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.42|>=5.6,<5.6.30",
+                "laravel/framework": ">=4,<4.0.99|>=4.1,<=4.1.31|>=4.2,<=4.2.22|>=5,<=5.0.35|>=5.1,<=5.1.46|>=5.2,<=5.2.45|>=5.3,<=5.3.31|>=5.4,<=5.4.36|>=5.5,<5.5.42|>=5.6,<5.6.30|>=7,<7.1.2",
                 "laravel/socialite": ">=1,<1.0.99|>=2,<2.0.10",
                 "league/commonmark": "<0.18.3",
-                "magento/magento1ce": "<1.9.4.1",
-                "magento/magento1ee": ">=1.9,<1.14.4.1",
-                "magento/product-community-edition": ">=2,<2.2.8|>=2.3,<2.3.1",
+                "librenms/librenms": "<1.53",
+                "magento/community-edition": ">=2,<2.2.10|>=2.3,<2.3.3",
+                "magento/magento1ce": "<1.9.4.3",
+                "magento/magento1ee": ">=1,<1.14.4.3",
+                "magento/product-community-edition": ">=2,<2.2.10|>=2.3,<2.3.2-p.2",
+                "marcwillmann/turn": "<0.3.3",
+                "mittwald/typo3_forum": "<1.2.1",
                 "monolog/monolog": ">=1.8,<1.12",
                 "namshi/jose": "<2.2",
+                "nystudio107/craft-seomatic": "<3.3",
+                "nzo/url-encryptor-bundle": ">=4,<4.3.2|>=5,<5.0.1",
+                "october/backend": ">=1.0.319,<1.0.467",
+                "october/cms": ">=1.0.319,<1.0.466",
+                "october/october": ">=1.0.319,<1.0.466",
                 "onelogin/php-saml": "<2.10.4",
+                "oneup/uploader-bundle": "<1.9.3|>=2,<2.1.5",
                 "openid/php-openid": "<2.3",
                 "oro/crm": ">=1.7,<1.7.4",
                 "oro/platform": ">=1.7,<1.7.4",
@@ -1184,63 +1620,91 @@
                 "paragonie/random_compat": "<2",
                 "paypal/merchant-sdk-php": "<3.12",
                 "pear/archive_tar": "<1.4.4",
-                "phpmailer/phpmailer": ">=5,<5.2.27|>=6,<6.0.6",
-                "phpoffice/phpexcel": "<=1.8.1",
-                "phpoffice/phpspreadsheet": "<=1.5",
+                "phpfastcache/phpfastcache": ">=5,<5.0.13",
+                "phpmailer/phpmailer": "<6.1.6",
+                "phpmussel/phpmussel": ">=1,<1.6",
+                "phpmyadmin/phpmyadmin": "<4.9.2",
+                "phpoffice/phpexcel": "<1.8.2",
+                "phpoffice/phpspreadsheet": "<1.8",
                 "phpunit/phpunit": ">=4.8.19,<4.8.28|>=5.0.10,<5.6.3",
                 "phpwhois/phpwhois": "<=4.2.5",
                 "phpxmlrpc/extras": "<0.6.1",
+                "pimcore/pimcore": "<6.3",
+                "prestashop/autoupgrade": ">=4,<4.10.1",
+                "prestashop/gamification": "<2.3.2",
+                "prestashop/ps_facetedsearch": "<3.4.1",
+                "privatebin/privatebin": "<1.2.2|>=1.3,<1.3.2",
                 "propel/propel": ">=2-alpha.1,<=2-alpha.7",
                 "propel/propel1": ">=1,<=1.7.1",
                 "pusher/pusher-php-server": "<2.2.1",
-                "robrichards/xmlseclibs": ">=1,<3.0.2",
+                "rainlab/debugbar-plugin": "<3.1",
+                "robrichards/xmlseclibs": "<3.0.4",
                 "sabre/dav": ">=1.6,<1.6.99|>=1.7,<1.7.11|>=1.8,<1.8.9",
+                "scheb/two-factor-bundle": ">=0,<3.26|>=4,<4.11",
                 "sensiolabs/connect": "<4.2.3",
                 "serluck/phpwhois": "<=4.2.6",
                 "shopware/shopware": "<5.3.7",
-                "silverstripe/cms": ">=3,<=3.0.11|>=3.1,<3.1.11",
+                "silverstripe/admin": ">=1.0.3,<1.0.4|>=1.1,<1.1.1",
+                "silverstripe/assets": ">=1,<1.4.7|>=1.5,<1.5.2",
+                "silverstripe/cms": "<4.3.6|>=4.4,<4.4.4",
+                "silverstripe/comments": ">=1.3,<1.9.99|>=2,<2.9.99|>=3,<3.1.1",
                 "silverstripe/forum": "<=0.6.1|>=0.7,<=0.7.3",
-                "silverstripe/framework": ">=3,<3.6.7|>=3.7,<3.7.3|>=4,<4.0.7|>=4.1,<4.1.5|>=4.2,<4.2.4|>=4.3,<4.3.1",
+                "silverstripe/framework": "<4.4.7|>=4.5,<4.5.4",
+                "silverstripe/graphql": ">=2,<2.0.5|>=3,<3.1.2|>=3.2,<3.2.4",
+                "silverstripe/registry": ">=2.1,<2.1.2|>=2.2,<2.2.1",
+                "silverstripe/restfulserver": ">=1,<1.0.9|>=2,<2.0.4",
+                "silverstripe/subsites": ">=2,<2.1.1",
+                "silverstripe/taxonomy": ">=1.3,<1.3.1|>=2,<2.0.1",
                 "silverstripe/userforms": "<3",
                 "simple-updates/phpwhois": "<=1",
                 "simplesamlphp/saml2": "<1.10.6|>=2,<2.3.8|>=3,<3.1.4",
-                "simplesamlphp/simplesamlphp": "<1.15.2|>=1.16,<1.16.3",
+                "simplesamlphp/simplesamlphp": "<1.18.6",
                 "simplesamlphp/simplesamlphp-module-infocard": "<1.0.1",
+                "simplito/elliptic-php": "<1.0.6",
                 "slim/slim": "<2.6",
                 "smarty/smarty": "<3.1.33",
                 "socalnick/scn-social-auth": "<1.15.2",
                 "spoonity/tcpdf": "<6.2.22",
                 "squizlabs/php_codesniffer": ">=1,<2.8.1|>=3,<3.0.1",
+                "ssddanbrown/bookstack": "<0.29.2",
                 "stormpath/sdk": ">=0,<9.9.99",
+                "studio-42/elfinder": "<2.1.49",
                 "swiftmailer/swiftmailer": ">=4,<5.4.5",
                 "sylius/admin-bundle": ">=1,<1.0.17|>=1.1,<1.1.9|>=1.2,<1.2.2",
                 "sylius/grid": ">=1,<1.1.19|>=1.2,<1.2.18|>=1.3,<1.3.13|>=1.4,<1.4.5|>=1.5,<1.5.1",
                 "sylius/grid-bundle": ">=1,<1.1.19|>=1.2,<1.2.18|>=1.3,<1.3.13|>=1.4,<1.4.5|>=1.5,<1.5.1",
-                "sylius/sylius": ">=1,<1.1.18|>=1.2,<1.2.17|>=1.3,<1.3.12|>=1.4,<1.4.4",
-                "symfony/cache": ">=3.2,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
+                "sylius/resource-bundle": "<1.3.13|>=1.4,<1.4.6|>=1.5,<1.5.1|>=1.6,<1.6.3",
+                "sylius/sylius": "<1.3.16|>=1.4,<1.4.12|>=1.5,<1.5.9|>=1.6,<1.6.5",
+                "symbiote/silverstripe-multivaluefield": ">=3,<3.0.99",
+                "symbiote/silverstripe-versionedfiles": "<=2.0.3",
+                "symfony/cache": ">=3.1,<3.4.35|>=4,<4.2.12|>=4.3,<4.3.8",
                 "symfony/dependency-injection": ">=2,<2.0.17|>=2.7,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
+                "symfony/error-handler": ">=4.4,<4.4.4|>=5,<5.0.4",
                 "symfony/form": ">=2.3,<2.3.35|>=2.4,<2.6.12|>=2.7,<2.7.50|>=2.8,<2.8.49|>=3,<3.4.20|>=4,<4.0.15|>=4.1,<4.1.9|>=4.2,<4.2.1",
                 "symfony/framework-bundle": ">=2,<2.3.18|>=2.4,<2.4.8|>=2.5,<2.5.2|>=2.7,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
-                "symfony/http-foundation": ">=2,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
-                "symfony/http-kernel": ">=2,<2.3.29|>=2.4,<2.5.12|>=2.6,<2.6.8",
+                "symfony/http-foundation": ">=2,<2.8.52|>=3,<3.4.35|>=4,<4.2.12|>=4.3,<4.3.8|>=4.4,<4.4.7|>=5,<5.0.7",
+                "symfony/http-kernel": ">=2,<2.8.52|>=3,<3.4.35|>=4,<4.2.12|>=4.3,<4.3.8",
                 "symfony/intl": ">=2.7,<2.7.38|>=2.8,<2.8.31|>=3,<3.2.14|>=3.3,<3.3.13",
+                "symfony/mime": ">=4.3,<4.3.8",
                 "symfony/phpunit-bridge": ">=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
                 "symfony/polyfill": ">=1,<1.10",
                 "symfony/polyfill-php55": ">=1,<1.10",
                 "symfony/proxy-manager-bridge": ">=2.7,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
                 "symfony/routing": ">=2,<2.0.19",
-                "symfony/security": ">=2,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
+                "symfony/security": ">=2,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7|>=4.4,<4.4.7|>=5,<5.0.7",
                 "symfony/security-bundle": ">=2,<2.7.48|>=2.8,<2.8.41|>=3,<3.3.17|>=3.4,<3.4.11|>=4,<4.0.11",
                 "symfony/security-core": ">=2.4,<2.6.13|>=2.7,<2.7.9|>=2.7.30,<2.7.32|>=2.8,<2.8.37|>=3,<3.3.17|>=3.4,<3.4.7|>=4,<4.0.7",
                 "symfony/security-csrf": ">=2.4,<2.7.48|>=2.8,<2.8.41|>=3,<3.3.17|>=3.4,<3.4.11|>=4,<4.0.11",
                 "symfony/security-guard": ">=2.8,<2.8.41|>=3,<3.3.17|>=3.4,<3.4.11|>=4,<4.0.11",
-                "symfony/security-http": ">=2.3,<2.3.41|>=2.4,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
+                "symfony/security-http": ">=2.3,<2.3.41|>=2.4,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.2.12|>=4.3,<4.3.8|>=4.4,<4.4.7|>=5,<5.0.7",
                 "symfony/serializer": ">=2,<2.0.11",
-                "symfony/symfony": ">=2,<2.7.51|>=2.8,<2.8.50|>=3,<3.4.26|>=4,<4.1.12|>=4.2,<4.2.7",
+                "symfony/symfony": ">=2,<2.8.52|>=3,<3.4.35|>=4,<4.2.12|>=4.3,<4.3.8|>=4.4,<4.4.7|>=5,<5.0.7",
                 "symfony/translation": ">=2,<2.0.17",
                 "symfony/validator": ">=2,<2.0.24|>=2.1,<2.1.12|>=2.2,<2.2.5|>=2.3,<2.3.3",
+                "symfony/var-exporter": ">=4.2,<4.2.12|>=4.3,<4.3.8",
                 "symfony/web-profiler-bundle": ">=2,<2.3.19|>=2.4,<2.4.9|>=2.5,<2.5.4",
                 "symfony/yaml": ">=2,<2.0.22|>=2.1,<2.1.7",
+                "t3g/svg-sanitizer": "<1.0.3",
                 "tecnickcom/tcpdf": "<6.2.22",
                 "thelia/backoffice-default-template": ">=2.1,<2.1.2",
                 "thelia/thelia": ">=2.1-beta.1,<2.1.3",
@@ -1248,14 +1712,17 @@
                 "titon/framework": ">=0,<9.9.99",
                 "truckersmp/phpwhois": "<=4.3.1",
                 "twig/twig": "<1.38|>=2,<2.7",
-                "typo3/cms": ">=6.2,<6.2.30|>=7,<7.6.32|>=8,<8.7.25|>=9,<9.5.6",
-                "typo3/cms-core": ">=8,<8.7.25|>=9,<9.5.6",
+                "typo3/cms": ">=6.2,<6.2.30|>=7,<7.6.32|>=8,<8.7.30|>=9,<9.5.20|>=10,<10.4.6",
+                "typo3/cms-core": ">=8,<8.7.30|>=9,<9.5.20|>=10,<10.4.6",
                 "typo3/flow": ">=1,<1.0.4|>=1.1,<1.1.1|>=2,<2.0.1|>=2.3,<2.3.16|>=3,<3.0.10|>=3.1,<3.1.7|>=3.2,<3.2.7|>=3.3,<3.3.5",
                 "typo3/neos": ">=1.1,<1.1.3|>=1.2,<1.2.13|>=2,<2.0.4",
                 "typo3/phar-stream-wrapper": ">=1,<2.1.1|>=3,<3.1.1",
                 "ua-parser/uap-php": "<3.8",
+                "usmanhalalit/pixie": "<1.0.3|>=2,<2.0.2",
+                "verot/class.upload.php": "<=1.0.3|>=2,<=2.0.4",
                 "wallabag/tcpdf": "<6.2.22",
                 "willdurand/js-translation-bundle": "<2.1.1",
+                "yii2mod/yii2-cms": "<1.9.2",
                 "yiisoft/yii": ">=1.1.14,<1.1.15",
                 "yiisoft/yii2": "<2.0.15",
                 "yiisoft/yii2-bootstrap": "<2.0.4",
@@ -1264,6 +1731,7 @@
                 "yiisoft/yii2-gii": "<2.0.4",
                 "yiisoft/yii2-jui": "<2.0.4",
                 "yiisoft/yii2-redis": "<2.0.8",
+                "yourls/yourls": "<1.7.4",
                 "zendframework/zend-cache": ">=2.4,<2.4.8|>=2.5,<2.5.3",
                 "zendframework/zend-captcha": ">=2,<2.4.9|>=2.5,<2.5.2",
                 "zendframework/zend-crypt": ">=2,<2.4.9|>=2.5,<2.5.2",
@@ -1300,10 +1768,25 @@
                     "name": "Marco Pivetta",
                     "email": "ocramius@gmail.com",
                     "role": "maintainer"
+                },
+                {
+                    "name": "Ilya Tribusean",
+                    "email": "slash3b@gmail.com",
+                    "role": "maintainer"
                 }
             ],
             "description": "Prevents installation of composer packages with known security vulnerabilities: no API, simply require it",
-            "time": "2019-05-22T09:34:58+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/Ocramius",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/roave/security-advisories",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-29T19:02:51+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",
@@ -1584,6 +2067,45 @@
             "time": "2016-11-19T08:54:04+00:00"
         },
         {
+            "name": "sebastian/finder-facade",
+            "version": "1.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/finder-facade.git",
+                "reference": "4a3174709c2dc565fe5fb26fcf827f6a1fc7b09f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/finder-facade/zipball/4a3174709c2dc565fe5fb26fcf827f6a1fc7b09f",
+                "reference": "4a3174709c2dc565fe5fb26fcf827f6a1fc7b09f",
+                "shasum": ""
+            },
+            "require": {
+                "symfony/finder": "~2.3|~3.0|~4.0",
+                "theseer/fdomdocument": "~1.3"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "FinderFacade is a convenience wrapper for Symfony's Finder component.",
+            "homepage": "https://github.com/sebastianbergmann/finder-facade",
+            "time": "2017-11-18T17:31:49+00:00"
+        },
+        {
             "name": "sebastian/global-state",
             "version": "1.1.1",
             "source": {
@@ -1679,6 +2201,56 @@
             "description": "Traverses array structures and object graphs to enumerate all referenced objects",
             "homepage": "https://github.com/sebastianbergmann/object-enumerator/",
             "time": "2017-02-18T15:18:39+00:00"
+        },
+        {
+            "name": "sebastian/phpcpd",
+            "version": "3.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/phpcpd.git",
+                "reference": "dfed51c1288790fc957c9433e2f49ab152e8a564"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpcpd/zipball/dfed51c1288790fc957c9433e2f49ab152e8a564",
+                "reference": "dfed51c1288790fc957c9433e2f49ab152e8a564",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6|^7.0",
+                "phpunit/php-timer": "^1.0.6",
+                "sebastian/finder-facade": "^1.1",
+                "sebastian/version": "^1.0|^2.0",
+                "symfony/console": "^2.7|^3.0|^4.0"
+            },
+            "bin": [
+                "phpcpd"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.0-dev"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "Copy/Paste Detector (CPD) for PHP code.",
+            "homepage": "https://github.com/sebastianbergmann/phpcpd",
+            "time": "2017-11-16T08:49:28+00:00"
         },
         {
             "name": "sebastian/recursion-context",
@@ -1819,17 +2391,202 @@
             "time": "2016-10-03T07:35:21+00:00"
         },
         {
-            "name": "symfony/css-selector",
-            "version": "v3.4.27",
+            "name": "sirbrillig/phpcs-variable-analysis",
+            "version": "v2.8.3",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/css-selector.git",
-                "reference": "8ca29297c29b64fb3a1a135e71cb25f67f9fdccf"
+                "url": "https://github.com/sirbrillig/phpcs-variable-analysis.git",
+                "reference": "00b4fa3130faa26762c929989e3d958086c627f1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/8ca29297c29b64fb3a1a135e71cb25f67f9fdccf",
-                "reference": "8ca29297c29b64fb3a1a135e71cb25f67f9fdccf",
+                "url": "https://api.github.com/repos/sirbrillig/phpcs-variable-analysis/zipball/00b4fa3130faa26762c929989e3d958086c627f1",
+                "reference": "00b4fa3130faa26762c929989e3d958086c627f1",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "squizlabs/php_codesniffer": "^3.1"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4 || ^0.5 || ^0.6",
+                "limedeck/phpunit-detailed-printer": "^3.1 || ^4.0 || ^5.0",
+                "phpstan/phpstan": "^0.11.8",
+                "phpunit/phpunit": "^5.0 || ^6.5 || ^7.0 || ^8.0",
+                "sirbrillig/phpcs-import-detection": "^1.1"
+            },
+            "type": "phpcodesniffer-standard",
+            "autoload": {
+                "psr-4": {
+                    "VariableAnalysis\\": "VariableAnalysis/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sam Graham",
+                    "email": "php-codesniffer-variableanalysis@illusori.co.uk"
+                },
+                {
+                    "name": "Payton Swick",
+                    "email": "payton@foolord.com"
+                }
+            ],
+            "description": "A PHPCS sniff to detect problems with variables.",
+            "time": "2020-07-11T23:32:06+00:00"
+        },
+        {
+            "name": "squizlabs/php_codesniffer",
+            "version": "3.5.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
+                "reference": "73e2e7f57d958e7228fce50dc0c61f58f017f9f6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/73e2e7f57d958e7228fce50dc0c61f58f017f9f6",
+                "reference": "73e2e7f57d958e7228fce50dc0c61f58f017f9f6",
+                "shasum": ""
+            },
+            "require": {
+                "ext-simplexml": "*",
+                "ext-tokenizer": "*",
+                "ext-xmlwriter": "*",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0"
+            },
+            "bin": [
+                "bin/phpcs",
+                "bin/phpcbf"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Greg Sherwood",
+                    "role": "lead"
+                }
+            ],
+            "description": "PHP_CodeSniffer tokenizes PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
+            "homepage": "https://github.com/squizlabs/PHP_CodeSniffer",
+            "keywords": [
+                "phpcs",
+                "standards"
+            ],
+            "time": "2020-04-17T01:09:41+00:00"
+        },
+        {
+            "name": "symfony/console",
+            "version": "v3.4.43",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/console.git",
+                "reference": "afc7189694d2c59546cf24ea606a236fa46a966e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/console/zipball/afc7189694d2c59546cf24ea606a236fa46a966e",
+                "reference": "afc7189694d2c59546cf24ea606a236fa46a966e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5.9|>=7.0.8",
+                "symfony/debug": "~2.8|~3.0|~4.0",
+                "symfony/polyfill-mbstring": "~1.0"
+            },
+            "conflict": {
+                "symfony/dependency-injection": "<3.4",
+                "symfony/process": "<3.3"
+            },
+            "provide": {
+                "psr/log-implementation": "1.0"
+            },
+            "require-dev": {
+                "psr/log": "~1.0",
+                "symfony/config": "~3.3|~4.0",
+                "symfony/dependency-injection": "~3.4|~4.0",
+                "symfony/event-dispatcher": "~2.8|~3.0|~4.0",
+                "symfony/lock": "~3.4|~4.0",
+                "symfony/process": "~3.3|~4.0"
+            },
+            "suggest": {
+                "psr/log": "For using the console logger",
+                "symfony/event-dispatcher": "",
+                "symfony/lock": "",
+                "symfony/process": ""
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Console\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Console Component",
+            "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-06T08:57:31+00:00"
+        },
+        {
+            "name": "symfony/css-selector",
+            "version": "v3.4.43",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/css-selector.git",
+                "reference": "9ccf6e78077a3fc1596e6c7b5958008965a11518"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/9ccf6e78077a3fc1596e6c7b5958008965a11518",
+                "reference": "9ccf6e78077a3fc1596e6c7b5958008965a11518",
                 "shasum": ""
             },
             "require": {
@@ -1855,9 +2612,79 @@
             ],
             "authors": [
                 {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
                     "name": "Jean-François Simon",
                     "email": "jeanfrancois.simon@sensiolabs.com"
                 },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony CssSelector Component",
+            "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-03-16T08:31:04+00:00"
+        },
+        {
+            "name": "symfony/debug",
+            "version": "v3.4.43",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/debug.git",
+                "reference": "7ce874f4432d8b11cc45a80cc5130a6e2609728d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/debug/zipball/7ce874f4432d8b11cc45a80cc5130a6e2609728d",
+                "reference": "7ce874f4432d8b11cc45a80cc5130a6e2609728d",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5.9|>=7.0.8",
+                "psr/log": "~1.0"
+            },
+            "conflict": {
+                "symfony/http-kernel": ">=2.3,<2.3.24|~2.4.0|>=2.5,<2.5.9|>=2.6,<2.6.2"
+            },
+            "require-dev": {
+                "symfony/http-kernel": "~2.8|~3.0|~4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Debug\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
                 {
                     "name": "Fabien Potencier",
                     "email": "fabien@symfony.com"
@@ -1867,22 +2694,36 @@
                     "homepage": "https://symfony.com/contributors"
                 }
             ],
-            "description": "Symfony CssSelector Component",
+            "description": "Symfony Debug Component",
             "homepage": "https://symfony.com",
-            "time": "2019-01-16T09:39:14+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-16T09:41:49+00:00"
         },
         {
             "name": "symfony/dom-crawler",
-            "version": "v3.4.27",
+            "version": "v3.4.43",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dom-crawler.git",
-                "reference": "d40023c057393fb25f7ca80af2a56ed948c45a09"
+                "reference": "fc66039e3138db2fc54ee9ad30646d99c4495691"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/d40023c057393fb25f7ca80af2a56ed948c45a09",
-                "reference": "d40023c057393fb25f7ca80af2a56ed948c45a09",
+                "url": "https://api.github.com/repos/symfony/dom-crawler/zipball/fc66039e3138db2fc54ee9ad30646d99c4495691",
+                "reference": "fc66039e3138db2fc54ee9ad30646d99c4495691",
                 "shasum": ""
             },
             "require": {
@@ -1926,20 +2767,97 @@
             ],
             "description": "Symfony DomCrawler Component",
             "homepage": "https://symfony.com",
-            "time": "2019-02-23T15:06:07+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-16T09:41:49+00:00"
         },
         {
-            "name": "symfony/polyfill-ctype",
-            "version": "v1.11.0",
+            "name": "symfony/finder",
+            "version": "v3.4.43",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "82ebae02209c21113908c229e9883c419720738a"
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "5ec813ccafa8164ef21757e8c725d3a57da59200"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/82ebae02209c21113908c229e9883c419720738a",
-                "reference": "82ebae02209c21113908c229e9883c419720738a",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/5ec813ccafa8164ef21757e8c725d3a57da59200",
+                "reference": "5ec813ccafa8164ef21757e8c725d3a57da59200",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5.9|>=7.0.8"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Finder\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Finder Component",
+            "homepage": "https://symfony.com",
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-02-14T07:34:21+00:00"
+        },
+        {
+            "name": "symfony/polyfill-ctype",
+            "version": "v1.18.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-ctype.git",
+                "reference": "1c302646f6efc070cd46856e600e5e0684d6b454"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/1c302646f6efc070cd46856e600e5e0684d6b454",
+                "reference": "1c302646f6efc070cd46856e600e5e0684d6b454",
                 "shasum": ""
             },
             "require": {
@@ -1951,7 +2869,11 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.11-dev"
+                    "dev-master": "1.18-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
                 }
             },
             "autoload": {
@@ -1968,12 +2890,12 @@
             ],
             "authors": [
                 {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                },
-                {
                     "name": "Gert de Pagter",
                     "email": "BackEndTea@gmail.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
@@ -1984,20 +2906,34 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2019-02-06T07:57:58+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-14T12:35:20+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.11.0",
+            "version": "v1.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "fe5e94c604826c35a32fa832f35bd036b6799609"
+                "reference": "a6977d63bf9a0ad4c65cd352709e230876f9904a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/fe5e94c604826c35a32fa832f35bd036b6799609",
-                "reference": "fe5e94c604826c35a32fa832f35bd036b6799609",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/a6977d63bf9a0ad4c65cd352709e230876f9904a",
+                "reference": "a6977d63bf9a0ad4c65cd352709e230876f9904a",
                 "shasum": ""
             },
             "require": {
@@ -2009,7 +2945,11 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.11-dev"
+                    "dev-master": "1.18-dev"
+                },
+                "thanks": {
+                    "name": "symfony/polyfill",
+                    "url": "https://github.com/symfony/polyfill"
                 }
             },
             "autoload": {
@@ -2043,20 +2983,34 @@
                 "portable",
                 "shim"
             ],
-            "time": "2019-02-06T07:57:58+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-14T12:35:20+00:00"
         },
         {
             "name": "symfony/yaml",
-            "version": "v3.4.27",
+            "version": "v3.4.43",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "212a27b731e5bfb735679d1ffaac82bd6a1dc996"
+                "reference": "e7fa05917ae931332a42d65b577ece4d497aad81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/212a27b731e5bfb735679d1ffaac82bd6a1dc996",
-                "reference": "212a27b731e5bfb735679d1ffaac82bd6a1dc996",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/e7fa05917ae931332a42d65b577ece4d497aad81",
+                "reference": "e7fa05917ae931332a42d65b577ece4d497aad81",
                 "shasum": ""
             },
             "require": {
@@ -2102,36 +3056,88 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "https://symfony.com",
-            "time": "2019-03-25T07:48:46+00:00"
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2020-07-23T09:37:51+00:00"
         },
         {
-            "name": "webmozart/assert",
-            "version": "1.4.0",
+            "name": "theseer/fdomdocument",
+            "version": "1.6.6",
             "source": {
                 "type": "git",
-                "url": "https://github.com/webmozart/assert.git",
-                "reference": "83e253c8e0be5b0257b881e1827274667c5c17a9"
+                "url": "https://github.com/theseer/fDOMDocument.git",
+                "reference": "6e8203e40a32a9c770bcb62fe37e68b948da6dca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webmozart/assert/zipball/83e253c8e0be5b0257b881e1827274667c5c17a9",
-                "reference": "83e253c8e0be5b0257b881e1827274667c5c17a9",
+                "url": "https://api.github.com/repos/theseer/fDOMDocument/zipball/6e8203e40a32a9c770bcb62fe37e68b948da6dca",
+                "reference": "6e8203e40a32a9c770bcb62fe37e68b948da6dca",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.3.3 || ^7.0",
-                "symfony/polyfill-ctype": "^1.8"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^4.6",
-                "sebastian/version": "^1.0.1"
+                "ext-dom": "*",
+                "lib-libxml": "*",
+                "php": ">=5.3.3"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.3-dev"
-                }
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
             },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Arne Blankerts",
+                    "email": "arne@blankerts.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "The classes contained within this repository extend the standard DOM to use exceptions at all occasions of errors instead of PHP warnings or notices. They also add various custom methods and shortcuts for convenience and to simplify the usage of DOM.",
+            "homepage": "https://github.com/theseer/fDOMDocument",
+            "time": "2017-06-30T11:53:12+00:00"
+        },
+        {
+            "name": "webmozart/assert",
+            "version": "1.9.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webmozart/assert.git",
+                "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webmozart/assert/zipball/bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "reference": "bafc69caeb4d49c39fd0779086c03a3738cbb389",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.3.3 || ^7.0 || ^8.0",
+                "symfony/polyfill-ctype": "^1.8"
+            },
+            "conflict": {
+                "phpstan/phpstan": "<0.12.20",
+                "vimeo/psalm": "<3.9.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8.36 || ^7.5.13"
+            },
+            "type": "library",
             "autoload": {
                 "psr-4": {
                     "Webmozart\\Assert\\": "src/"
@@ -2153,7 +3159,53 @@
                 "check",
                 "validate"
             ],
-            "time": "2018-12-25T11:19:39+00:00"
+            "time": "2020-07-08T17:02:28+00:00"
+        },
+        {
+            "name": "wp-coding-standards/wpcs",
+            "version": "2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/WordPress-Coding-Standards.git",
+                "reference": "7da1894633f168fe244afc6de00d141f27517b62"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/WordPress-Coding-Standards/zipball/7da1894633f168fe244afc6de00d141f27517b62",
+                "reference": "7da1894633f168fe244afc6de00d141f27517b62",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4",
+                "squizlabs/php_codesniffer": "^3.3.1"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.5 || ^0.6",
+                "phpcompatibility/php-compatibility": "^9.0",
+                "phpcsstandards/phpcsdevtools": "^1.0",
+                "phpunit/phpunit": "^4.0 || ^5.0 || ^6.0 || ^7.0"
+            },
+            "suggest": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.6 || This Composer plugin will sort out the PHPCS 'installed_paths' automatically."
+            },
+            "type": "phpcodesniffer-standard",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/WordPress/WordPress-Coding-Standards/graphs/contributors"
+                }
+            ],
+            "description": "PHP_CodeSniffer rules (sniffs) to enforce WordPress coding conventions",
+            "keywords": [
+                "phpcs",
+                "standards",
+                "wordpress"
+            ],
+            "time": "2020-05-13T23:57:56+00:00"
         },
         {
             "name": "xrstf/composer-php52",
@@ -2190,7 +3242,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "roave/security-advisories": 20
+        "roave/security-advisories": 20,
+        "otgs/toolset-coding-standards": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -2200,5 +3253,6 @@
     "platform-dev": [],
     "platform-overrides": {
         "php": "5.6"
-    }
+    },
+    "plugin-api-version": "1.1.0"
 }

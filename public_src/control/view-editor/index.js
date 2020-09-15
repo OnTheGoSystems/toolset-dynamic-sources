@@ -2,16 +2,18 @@
 import { Component } from '@wordpress/element';
 import { addAction, addFilter, doAction } from '@wordpress/hooks';
 import { select, subscribe } from '@wordpress/data';
-import { includes } from 'lodash';
+import { includes, merge, isEqual } from 'lodash';
 
 // Internal dependencies
 const { toolsetDynamicSourcesScriptData: i18n, Toolset } = window;
+import isCustomPostProvider from '../../utils/is-custom-post-provider';
 
 class ViewEditor extends Component {
 	postTypes = [];
 	previewPostId = null;
 	viewStoreIds = [];
 	random = null;
+	viewId = null;
 
 	constructor( props = {} ) {
 		super( props );
@@ -20,7 +22,7 @@ class ViewEditor extends Component {
 			'tb.dynamicSources.actions.cache.initiateFetching',
 			'toolset-blocks',
 			() => {
-				const editorBlocks = select( 'core/editor' ).getBlocks();
+				const editorBlocks = select( 'core/block-editor' ).getBlocks();
 				editorBlocks
 					.filter( block => block.name === 'toolset-views/view-editor' )
 					.forEach(
@@ -30,6 +32,7 @@ class ViewEditor extends Component {
 							const viewContentSelectionSettings = select( viewReduxStoreId ).getContentSelection();
 							if ( 'posts' === viewContentSelectionSettings.query_type ) {
 								doAction( 'tb.dynamicSources.action.updateSources', viewContentSelectionSettings.post_type, viewGeneralSettings.preview_post_id, viewReduxStoreId );
+								doAction( 'toolset.views.updatePreview', viewReduxStoreId, true );
 							}
 						}
 					);
@@ -79,13 +82,67 @@ class ViewEditor extends Component {
 				} else {
 					this.viewStoreIds[ previewPostId ] = [ viewStoreId ];
 				}
+				this.viewId = select( viewStoreId ).getGeneral().id;
 
 				// A random value is always passed as an argument to the store's selector in order to always invoke the
 				// relevant resolver. The "data" package seems to be doing some kind of caching when it comes to resolvers
 				// with argument values that have already been resolved, To bypass this a random argument needs to be fed in,
 				// to fake an argument set change.
-				select( i18n.dynamicSourcesStore ).getDynamicSources( this.postTypes, this.previewPostId, this.random );
+				select( i18n.dynamicSourcesStore ).getDynamicSources(
+					this.postTypes,
+					this.previewPostId,
+					this.random,
+					this.viewId
+				);
 			}
+		);
+
+		addAction(
+			'tb.dynamicSources.actions.providers.customPostLoaded',
+			'toolset-blocks',
+			( providerId, providerLabel ) => {
+				if ( !! this.previewPostId ) {
+					if ( ! i18n.postProvidersForViews[ this.previewPostId ] ) {
+						i18n.postProvidersForViews[ this.previewPostId ] = [];
+					}
+
+					if ( ! i18n.postProvidersForViews[ this.previewPostId ].find( item => item.value === providerId ) ) {
+						i18n.postProvidersForViews[ this.previewPostId ].push( { value: providerId, label: providerLabel } );
+					}
+				}
+			}, 10, 3
+		);
+
+		addAction(
+			'tb.dynamicSources.actions.source.customPostLoaded',
+			'toolset-blocks',
+			( providerId, source ) => {
+				if ( !! this.previewPostId ) {
+					if ( ! i18n.dynamicSourcesForViews[ this.previewPostId ] ) {
+						i18n.dynamicSourcesForViews[ this.previewPostId ] = {};
+					}
+
+					if ( ! i18n.dynamicSourcesForViews[ this.previewPostId ][ providerId ] ) {
+						i18n.dynamicSourcesForViews[ this.previewPostId ][ providerId ] = source.__current_post;
+					}
+				}
+			}, 10, 2
+		);
+
+		addAction(
+			'tb.dynamicSources.actions.cache.customPostLoaded',
+			'toolset-blocks',
+			( providerId, cache ) => {
+				if ( !! this.previewPostId ) {
+					if ( ! i18n.cacheForViews[ this.previewPostId ] ) {
+						i18n.cacheForViews[ this.previewPostId ] = {};
+					}
+
+					if ( ! i18n.cacheForViews[ this.previewPostId ][ providerId ] ) {
+						i18n.cacheForViews[ this.previewPostId ][ providerId ] = cache.__current_post;
+					}
+				}
+			}, 10, 2
 		);
 
 		Toolset.hooks.addFilter(
@@ -100,7 +157,12 @@ class ViewEditor extends Component {
 				return;
 			}
 
-			const dynamicSourcesInfo = select( i18n.dynamicSourcesStore ).getDynamicSources( this.postTypes, this.previewPostId, this.random );
+			const dynamicSourcesInfo = select( i18n.dynamicSourcesStore ).getDynamicSources(
+				this.postTypes,
+				this.previewPostId,
+				this.random,
+				this.viewId
+			);
 
 			if ( ! dynamicSourcesInfo ) {
 				return;
@@ -111,12 +173,19 @@ class ViewEditor extends Component {
 					postProvidersForViews = {},
 					cacheForViews = {};
 
-				postProvidersForViews[ dynamicSourcesInfo.previewPostId ] = dynamicSourcesInfo.postProviders;
-				dynamicSourcesForViews[ dynamicSourcesInfo.previewPostId ] = dynamicSourcesInfo.dynamicSources;
-				cacheForViews[ dynamicSourcesInfo.previewPostId ] = dynamicSourcesInfo.cache;
+				postProvidersForViews[ dynamicSourcesInfo.previewPostId ] = this.maybeAppendPostProvidersForCustomPost( dynamicSourcesInfo.postProviders );
+				dynamicSourcesForViews[ dynamicSourcesInfo.previewPostId ] = this.maybeAppendDynamicSourcesForCustomPost( dynamicSourcesInfo.dynamicSources );
+				cacheForViews[ dynamicSourcesInfo.previewPostId ] = this.maybeAppendCacheForCustomPost( dynamicSourcesInfo.cache );
 
-				i18n.postProvidersForViews = { ...i18n.postProvidersForViews, ...postProvidersForViews };
-				i18n.dynamicSourcesForViews = { ...i18n.dynamicSourcesForViews, ...dynamicSourcesForViews };
+				if (
+					! isEqual( i18n.postProvidersForViews, postProvidersForViews ) ||
+					! isEqual( i18n.dynamicSourcesForViews, dynamicSourcesForViews )
+				) {
+					i18n.postProvidersForViews = merge( i18n.postProvidersForViews, postProvidersForViews );
+					i18n.dynamicSourcesForViews = merge( i18n.dynamicSourcesForViews, dynamicSourcesForViews );
+
+					doAction( 'tb.dynamicSources.actions.sourceAndProvidersForViewsUpdated' );
+				}
 
 				let shouldSendCacheTick = false;
 				const newCacheForViews = { ...i18n.cacheForViews, ...cacheForViews };
@@ -133,7 +202,8 @@ class ViewEditor extends Component {
 				}
 
 				if ( this.previewPostId !== dynamicSourcesInfo.previewPostId ) {
-					shouldSendCacheTick = true;
+					// This is not a solution, it is a workaround until it is really fixed
+					// shouldSendCacheTick = true;
 				}
 
 				if ( shouldSendCacheTick ) {
@@ -142,6 +212,55 @@ class ViewEditor extends Component {
 			}
 		} );
 	}
+
+	maybeAppendPostProvidersForCustomPost = ( postProviders ) => {
+		const customPostProviders = i18n.postProviders.filter(
+			postProvider => {
+				return isCustomPostProvider( postProvider.value ) && '__custom_post' !== postProvider.value;
+			}
+		);
+
+		const newPostProviders = [ ...postProviders, ...customPostProviders ];
+		// Removing duplicate entries...
+		return newPostProviders.filter(
+			( item, index ) => newPostProviders.indexOf( item ) === index
+		);
+	};
+
+	maybeAppendDynamicSourcesForCustomPost = ( dynamicSources ) => {
+		const customPostDynamicSources = Object.keys( i18n.dynamicSources )
+			.filter(
+				dynamicSourceKey => {
+					return isCustomPostProvider( dynamicSourceKey ) && '__custom_post' !== dynamicSourceKey;
+				}
+			)
+			.reduce(
+				( obj, key ) => {
+					obj[ key ] = i18n.dynamicSources[ key ];
+					return obj;
+				},
+				{}
+			);
+
+		return merge( dynamicSources, customPostDynamicSources );
+	};
+
+	maybeAppendCacheForCustomPost = ( cache ) => {
+		const customPostCache = Object.keys( i18n.cache )
+			.filter(
+				cacheKey => {
+					return isCustomPostProvider( cacheKey ) && '__custom_post' !== cacheKey;
+				}
+			)
+			.reduce(
+				( obj, key ) => {
+					obj[ key ] = i18n.cache[ key ];
+					return obj;
+				},
+				{}
+			);
+		return merge( cache, customPostCache );
+	};
 
 	blockInsideViewAdjustmentCallback = ( value, clientId, subject ) => {
 		const parentViewBlock = this.maybeGetParentViewBlock( clientId );
@@ -162,7 +281,7 @@ class ViewEditor extends Component {
 	};
 
 	maybeGetParentViewBlock = ( blockId ) => {
-		const { getBlock, getBlockRootClientId } = select( 'core/editor' );
+		const { getBlock, getBlockRootClientId } = select( 'core/block-editor' );
 		let result = null,
 			currentBlockId = blockId;
 

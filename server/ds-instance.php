@@ -8,11 +8,15 @@
  * 101001 = The  1 merge to develop while working on 1.0.2.
  * ...
  * 101019 = The 19 merge to develop while working on 1.0.2.
+ * git co develop
  * 102000 = Version 1.0.2
  *
  * ...and so on...
+ *
+ * Note that this number schema is broken until 1.1.0 at least...
  */
-$toolset_dynamic_sources_version = 105000;
+
+$toolset_dynamic_sources_version = 116000;
 
 /**
  * Priority is: 100000 - $toolset_dynamic_sources_version <= 0

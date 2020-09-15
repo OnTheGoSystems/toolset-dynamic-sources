@@ -53,7 +53,7 @@ class CustomFieldGroupSource
 	 * @return string
 	 */
 	public function get_title() {
-		return $this->field_group->get_title();
+		return $this->field_group->get_display_name();
 	}
 
 
@@ -87,7 +87,7 @@ class CustomFieldGroupSource
 	 * @return string
 	 */
 	public function get_content( $field = null, $attributes = null ) {
-		$selected_field = $this->field_group->get_field( $field );
+		$selected_field = $this->field_group->get_field_definition( $field );
 		if( null === $selected_field ) {
 			return '';
 		}
@@ -148,12 +148,12 @@ class CustomFieldGroupSource
 					'label' => $field->get_name(),
 					'value' => $field->get_slug(),
 					'categories' => $field->get_categories(),
-					'type' => $field->get_type(),
+					'type' => $field->get_type_slug(),
 					'fieldOptions' => $field->get_options(),
-					'is_repetitive' => $field->is_repetitive(),
+					'is_repetitive' => $field->is_repeatable(),
 				];
 			},
-			$this->field_group->get_fields()
+			$this->field_group->get_field_definitions()
 		) );
 	}
 }

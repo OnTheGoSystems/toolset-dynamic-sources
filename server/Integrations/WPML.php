@@ -3,11 +3,12 @@
 namespace Toolset\DynamicSources\Integrations;
 
 use Toolset\DynamicSources\DynamicSources;
+use WP_Block_Parser_Block;
 
 class WPML {
 
 	public function initialize() {
-		add_filter( 'wpml_found_strings_in_block', array( $this, 'remove_dynamic_source_strings_from_block' ) );
+		add_filter( 'wpml_found_strings_in_block', array( $this, 'remove_dynamic_source_strings_from_block' ), 10, 2 );
 		add_filter(
 			'toolset/dynamic_sources/filters/shortcode_post_provider',
 			array( $this, 'convert_post_provider' )
@@ -16,13 +17,51 @@ class WPML {
 
 	/**
 	 * @param array $strings
+	 * @param WP_Block_Parser_Block $block
 	 *
 	 * @return array
 	 */
-	public function remove_dynamic_source_strings_from_block( array $strings ) {
+	public function remove_dynamic_source_strings_from_block( array $strings, WP_Block_Parser_Block $block ) {
+		$dynamicAttributeStrings = $this->getDynamicAttributeStrings( $block );
+
 		foreach ( $strings as $key => $string ) {
-			if ( 0 === strpos( $string->value, '[' . \Toolset\DynamicSources\DynamicSources::SHORTCODE ) ) {
+			if (
+				$this->isOnlyDynamicShortcode( $string->value )
+				|| in_array( $string->value, $dynamicAttributeStrings, true )
+			) {
 				unset( $strings[ $key ] );
+			}
+		}
+
+		return array_values( $strings );
+	}
+
+	/**
+	 * @param string $value
+	 *
+	 * @return bool
+	 */
+	private function isOnlyDynamicShortcode( $value ) {
+		return (bool) preg_match( '/^\[' . \Toolset\DynamicSources\DynamicSources::SHORTCODE . '[^\]]*]$/', $value );
+	}
+
+	/**
+	 * @param WP_Block_Parser_Block $block
+	 *
+	 * @return array
+	 */
+	private function getDynamicAttributeStrings( WP_Block_Parser_Block $block ) {
+		$strings = [];
+
+		if ( isset( $block->attrs['dynamic'] ) ) {
+			foreach ( $block->attrs['dynamic'] as $attributeName => $config ) {
+				if (
+					isset( $config['isActive'], $block->attrs[ $attributeName ] )
+					&& $config['isActive']
+					&& is_string( $block->attrs[ $attributeName ] )
+				) {
+					$strings[] = $block->attrs[ $attributeName ];
+				}
 			}
 		}
 

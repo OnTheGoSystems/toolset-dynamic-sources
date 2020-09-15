@@ -28,3 +28,5 @@ export { DynamicSource } from './control/dynamic-sources/DynamicSource';
 export { DynamicSourceUnified } from './control/dynamic-sources/DynamicSourceUnified';
 export { default as withToolsetDynamicField } from './with-dynamic-field/component';
 export { default as getShortcodeOrStatic } from './with-dynamic-field/get-shortcode-or-static';
+export { default as FieldOptions } from './control/dynamic-sources/FieldOptions';
+export * from './utils/constants';

@@ -15,7 +15,8 @@ class WPML extends \OTGS_TestCase {
 
 		\WP_Mock::expectFilterAdded(
 			'wpml_found_strings_in_block',
-			array( $subject, 'remove_dynamic_source_strings_from_block' )
+			array( $subject, 'remove_dynamic_source_strings_from_block' ),
+			10, 2
 		);
 
 		\WP_Mock::expectFilterAdded(
@@ -30,7 +31,7 @@ class WPML extends \OTGS_TestCase {
 	 * @test
 	 * @group wpmlcore-6611
 	 */
-	public function it_should_remove_dynamic_source_strings_from_block() {
+	public function it_should_remove_dynamic_source_shortcode_string_from_block() {
 		$strings = array(
 			(object) array(
 				'value' => 'some value',
@@ -42,10 +43,78 @@ class WPML extends \OTGS_TestCase {
 
 		$subject = new SubjectWPML();
 
-		$filtered_strings = $subject->remove_dynamic_source_strings_from_block( $strings );
+		$filtered_strings = $subject->remove_dynamic_source_strings_from_block( $strings, $this->getBlock() );
 
 		$this->assertCount( 1, $filtered_strings );
 		$this->assertEquals( 'some value', $filtered_strings[0]->value );
+	}
+
+	/**
+	 * @test
+	 * @dataProvider dp_should_not_remove_string_containing_more_than_dynamic_source_shortcode
+	 * @group toolsetblocks-628
+	 *
+	 * @param string $stringValue
+	 */
+	public function it_should_not_remove_string_containing_more_than_dynamic_source_shortcode( $stringValue ) {
+		$strings = [
+			(object) [
+				'value' => $stringValue,
+			],
+		];
+
+		$subject = new SubjectWPML();
+
+		$filtered_strings = $subject->remove_dynamic_source_strings_from_block( $strings, $this->getBlock() );
+
+		$this->assertCount( 1, $filtered_strings );
+		$this->assertEquals( $stringValue, $filtered_strings[0]->value );
+	}
+
+	public function dp_should_not_remove_string_containing_more_than_dynamic_source_shortcode() {
+		return [
+			'text before' => [ 'some text [' . \Toolset\DynamicSources\DynamicSources::SHORTCODE . ' foo="bar"]' ],
+			'text after'  => [ '[' . \Toolset\DynamicSources\DynamicSources::SHORTCODE . ' foo="bar"] som text' ],
+		];
+	}
+
+	/**
+	 * @test
+	 * @group toolsetblocks-627
+	 */
+	public function it_should_remove_dynamic_source_strings_from_block_attributes() {
+		$stringToRemove = 'The active dynamic attribute string to remove';
+		$stringToKeep   = 'String for the inactive dynamic attribute (to keep)';
+
+		$strings = [
+			(object) [
+				'value' => $stringToRemove,
+			],
+			(object) [
+				'value' => $stringToKeep,
+			],
+		];
+
+		$attributes = [
+			'dynamicAttributeActive'    => $stringToRemove,
+			'dynamicAttributeInactive'  => $stringToKeep,
+			'dynamicAttributeNotString' => [ 'something' ], // Not sure this case exist but I prefer to test it
+			'dynamic' => [
+				'dynamicAttributeActive'                    => [ 'isActive' => true ],
+				'dynamicAttributeInactive'                  => [],
+				'dynamicAttributeNotString'                 => [ 'isActive' => true ],
+				'dynamicAttributeThatDoesNotActuallyExists' => [ 'isActive' => true ],
+			],
+		];
+
+		$block = $this->getBlock( $attributes );
+
+		$subject = new SubjectWPML();
+
+		$filtered_strings = $subject->remove_dynamic_source_strings_from_block( $strings, $block );
+
+		$this->assertCount( 1, $filtered_strings );
+		$this->assertEquals( $stringToKeep, $filtered_strings[0]->value );
 	}
 
 	/**
@@ -78,5 +147,17 @@ class WPML extends \OTGS_TestCase {
 		$subject = new SubjectWPML();
 
 		$this->assertEquals( $converted_post_provider, $subject->convert_post_provider( $post_provider ) );
+	}
+
+	/**
+	 * @param array $attrs
+	 *
+	 * @return \WP_Block_Parser_Block|\PHPUnit_Framework_MockObject_MockObject
+	 */
+	private function getBlock( $attrs = [] ) {
+		$block = $this->getMockBuilder( '\WP_Block_Parser_Block' )->getMock();
+		$block->attrs = $attrs;
+
+		return $block;
 	}
 }

@@ -4,6 +4,7 @@ namespace Toolset\DynamicSources;
 
 use Toolset\DynamicSources\PostProviders\IdentityPost;
 use Toolset\DynamicSources\PostProviders\CustomPost;
+use Toolset\DynamicSources\PostProviders\PostProviders;
 use Toolset\DynamicSources\Sources\Source;
 
 class DynamicSources {
@@ -43,6 +44,8 @@ class DynamicSources {
 
 	const HTML_CATEGORY = 'html';
 
+	const EMBED_CATEGORY = 'embed';
+
 	const VALUE_SEPARATOR = '#+*#';
 
 	const CUSTOM_POST_TYPE_REGEXP = '/"(custom_post_type\|[^\|]+\|\d+)"/';
@@ -62,22 +65,19 @@ class DynamicSources {
 	/** @var SourceContext */
 	private $source_context;
 
-
 	/** @var SourceStorage */
 	private $source_storage;
+
+	/** @var Registration */
+	private $sources_registration_factory;
 
 	/** @var DicLoader */
 	private $dic;
 
 	private $registered_dynamic_sources_repo = array();
 
-	public static $toolset_dynamic_sources_version;
-
 	public function __construct() {
 		$this->dic = DicLoader::get_instance()->get_dic();
-
-		$ds_loader = require __DIR__ . '/ds-instance.php';
-		self::$toolset_dynamic_sources_version = $ds_loader['version'];
 
 		add_action( 'toolset/dynamic_sources/actions/toolset_dynamic_sources_initialize', array( $this, 'initialize' ) );
 	}
@@ -133,11 +133,13 @@ class DynamicSources {
 		// Replaces the shortcodes inside HTML attributes for Content Templates.
 		add_filter( 'wpv_filter_content_template_output', array( $this, 'shortcode_render' ), -1 );
 
-		add_filter( 'toolset/dynamic_sources/filters/register_post_providers', array( $this, 'set_custom_post_provider' ), 10000 );
-
 		if ( defined( 'ICL_SITEPRESS_VERSION' ) ) {
 			$this->dic->make( \Toolset\DynamicSources\Integrations\WPML::class )->initialize();
 		}
+
+		$this->sources_registration_factory = $this->dic->make( Registration::class );
+
+		$this->dic->make( \Toolset\DynamicSources\PostProviders\PostProviders::class )->initialize();
 	}
 
 	public function initialize_toolset_fields_sources() {
@@ -157,7 +159,7 @@ class DynamicSources {
 	public function initialize_views_integration() {
 		$toolset_utils = $this->dic->make( \Toolset\DynamicSources\Utils\Toolset::class );
 		if ( $toolset_utils->is_views_enabled() ) {
-			$args = array(
+			$internals_args = array(
 				':view_get_instance' => array(
 					'\WPV_View_Embedded',
 					'get_instance',
@@ -166,8 +168,17 @@ class DynamicSources {
 					'\WPV_Content_Template_Embedded',
 					'get_instance',
 				),
+			);
+
+			$toolset_views_integration_internals = $this->dic->make(
+				\Toolset\DynamicSources\Integrations\Views\Internals::class,
+				$internals_args
+			);
+
+			$args = array(
 				':content_template_post_type' => \WPV_Content_Template_Embedded::POST_TYPE,
 				':wpa_helper_post_type' => null,
+				':integration_internals' => $toolset_views_integration_internals,
 			);
 
 			if ( class_exists( BlockEditorWPA::class ) ) {
@@ -205,8 +216,15 @@ class DynamicSources {
 			'PostStatus',
 			// 'PostFields',
 			'PostTaxonomies',
+			'PostTaxonomiesRich',
 			'AuthorID',
 			'AuthorName',
+			'AuthorPostsLink',
+			'AuthorPostsUrl',
+			'AuthorProfilePicture',
+			'AuthorPosts',
+			'AuthorFirstName',
+			'AuthorLastName',
 			'CommentsNumber',
 			'CommentsStatus',
 			'MediaFeaturedImageData',
@@ -256,8 +274,10 @@ class DynamicSources {
 
 	/**
 	 * Registers the Dynamic Sources.
+	 *
+	 * @param null|int $view_id Needed when getting potential sources inside a View, to get View settings.
 	 */
-	public function register_sources() {
+	public function register_sources( $view_id = null ) {
 		$post_id = get_the_ID();
 		$post_type = get_post_type();
 
@@ -299,14 +319,17 @@ class DynamicSources {
 		}
 
 		// Get the initial context, in which everything happens.
-		$this->source_context = $this->build_source_context( $post_type );
+		$this->source_context = $this->sources_registration_factory->build_source_context( $post_type, $view_id );
 
 		if ( null === $this->source_context ) {
 			return;
 		}
 
+		// The "Featured Image" source needs to be excluded for post types that are not supporting a thumbnail (featured image).
+		$this->sources_for_registration = $this->sources_registration_factory->maybe_exclude_featured_image_source_from_registration( $post_type, $this->sources_for_registration );
+
 		// Based on this context, get all sources of posts which we can use.
-		$this->post_providers = $this->register_post_providers( $this->source_context );
+		$this->post_providers = $this->sources_registration_factory->register_post_providers( $this->source_context );
 
 		// Register data sources that can be used with available post providers.
 		$this->register_data_sources( $this->post_providers );
@@ -354,60 +377,10 @@ class DynamicSources {
 		);
 	}
 
-
-	public function build_source_context( $post_type ) {
-		/**
-		 * toolset/dynamic_sources/filters/source_context
-		 *
-		 * Filter that allows altering the SourceContext object before it is used.
-		 *
-		 * @param SourceContext
-		 * @return SourceContext
-		 */
-		$source_context = apply_filters(
-			'toolset/dynamic_sources/filters/source_context',
-			new PostTypeSourceContext( $post_type )
-		);
-
-		if( ! $source_context instanceof SourceContext ) {
-			throw new \InvalidArgumentException();
-		}
-
-		return $source_context;
-	}
-
-
-	/**
-	 * Register all post providers available within the given source context.
-	 *
-	 * @param SourceContext $source_context
-	 *
-	 * @return PostProvider[]
-	 */
-	private function register_post_providers( SourceContext $source_context ) {
-		$identity_post = new IdentityPost( $source_context->get_post_types() );
-		$post_providers = array_filter(
-			apply_filters(
-				'toolset/dynamic_sources/filters/register_post_providers',
-				array(
-					$identity_post->get_unique_slug() => $identity_post
-				),
-				$source_context
-			),
-			function( $post_provider ) {
-				return $post_provider instanceof PostProvider;
-			}
-		);
-
-		return $post_providers;
-	}
-
-
 	/**
 	 * @param PostProvider[] $post_providers
 	 */
 	private function register_data_sources( $post_providers ) {
-
 		/**
 		 * Filters the the Dynamic Sources offered.
 		 *
@@ -425,7 +398,6 @@ class DynamicSources {
 		foreach( $this->sources_for_registration as $source_for_registration ) {
 			$this->register_source( $source_for_registration );
 		}
-
 	}
 
 	/**
@@ -471,11 +443,11 @@ class DynamicSources {
 
 		$source = $this->create_source( $source, $this->post_providers[ $post_provider ] );
 
-		if ( ! $source || ! $source instanceof Sources\Source ) {
-			return '';
-		}
-
-		$content = $source->get_content( $field, $extra_attributes );
+		// Even if the source returns no content, the execution of the method needs to continue in order to restore the
+		// previously set "current post".
+		$content = ! $source || ! $source instanceof Sources\Source ?
+			'' :
+			$source->get_content( $field, $extra_attributes );
 
 		$this->restore_current_post();
 
@@ -528,11 +500,21 @@ class DynamicSources {
 	 */
 	public function get_post_providers_for_select() {
 		$post_providers = array();
+		$post_provider_labels = array();
+
+		// Make an array of duplicate labels.
+		foreach ( $this->post_providers as $post_provider ) {
+			$label_for_duplicate_check = strtolower( trim( $post_provider->get_label() ) );
+			$post_provider_labels[] = $label_for_duplicate_check;
+		}
+		$duplicate_labels = array_diff_assoc( $post_provider_labels, array_unique( $post_provider_labels ) );
 
 		foreach ( $this->post_providers as $post_provider ) {
+			$label_for_duplicate_check = strtolower( trim( $post_provider->get_label() ) );
+			$has_duplicate_label = in_array( $label_for_duplicate_check, $duplicate_labels, true );
 			$post_providers[] = array(
 				'value' => $post_provider->get_unique_slug(),
-				'label' => $post_provider->get_label(),
+				'label' => $post_provider->get_label( $has_duplicate_label ),
 			);
 		}
 
@@ -625,6 +607,7 @@ class DynamicSources {
 				'post' => 'current',
 				'source' => '',
 				'field' => '',
+				'default-value' => null,
 			),
 			$attributes
 		);
@@ -633,18 +616,20 @@ class DynamicSources {
 		$providers = explode( self::VALUE_SEPARATOR, $atts['provider'] );
 		$sources = explode( self::VALUE_SEPARATOR, $atts['source'] );
 		$fields = explode( self::VALUE_SEPARATOR, $atts['field'] );
+		$default_value = explode( self::VALUE_SEPARATOR, $atts['default-value'] );
 
 		// loop over all required sources
 		for( $i = 0; $i < count( $providers ); $i++ ) {
 			$has_content_attributes = array(
 				'provider' => $providers[$i],
 				'source' => $sources[$i],
-				'field' => $fields[$i]
+				'field' => $fields[$i],
+				'default-value' => isset( $default_value[ $i ] ) ? $default_value[ $i ] : null,
 			);
 
 			$has_content = $this->get_shortcode_content( $has_content_attributes );
 
-			if( empty( $has_content ) ) {
+			if( empty( $has_content ) && ! is_numeric( $has_content ) ) {
 				// one required sources has no value... means no output for this block
 				return '';
 			}
@@ -653,7 +638,7 @@ class DynamicSources {
 		// all required dynamic sources have content, proceed...
 		$content = do_shortcode( $content );
 
-		if( empty( $content ) ) {
+		if( empty( $content ) && ! is_numeric( $content ) ) {
 			// empty inner content, means theres probably some misconfiguration on the block
 			// because the container should have the same parameters as the inner shortcode
 			return '';
@@ -679,6 +664,7 @@ class DynamicSources {
 				'source' => '',
 				'field' => '',
 				'force-string' => false,
+				'default-value' => null,
 			),
 			$attributes
 		);
@@ -687,6 +673,7 @@ class DynamicSources {
 		$post = sanitize_text_field( $atts['post'] );
 		$source = sanitize_text_field( $atts[ 'source' ] );
 		$field = sanitize_text_field( $atts['field'] );
+		$default_value = sanitize_text_field( $atts['default-value'] );
 
 		if ( 'current' === $post ) {
 			$post = get_the_ID();
@@ -717,6 +704,9 @@ class DynamicSources {
 			if ( is_array( $output ) ) {
 				$output = implode( ',', $output );
 			}
+		}
+		if ( ! $output && null !== $default_value ) {
+			return $default_value;
 		}
 		return $output;
 	}
@@ -849,41 +839,10 @@ class DynamicSources {
 			array(
 				'postProviders' => apply_filters( 'toolset/dynamic_sources/filters/get_post_providers_for_select', array() ),
 				'dynamicSources' => apply_filters( 'toolset/dynamic_sources/filters/get_grouped_sources', array() ),
-				'dynamicSourcesStore' => \Toolset\DynamicSources\DynamicSources::TOOLSET_BLOCKS_DYNAMIC_SOURCES_STORE,
+				'dynamicSourcesStore' => self::TOOLSET_BLOCKS_DYNAMIC_SOURCES_STORE,
 				'cache' => apply_filters( 'toolset/dynamic_sources/filters/cache', array(), get_the_ID() ),
 			)
 		);
-	}
-
-
-	/**
-	 * Adds a CustomPost provider to the last element
-	 *
-	 * @param array $providers
-	 * @return array
-	 */
-	public function set_custom_post_provider( $providers, $content = null ) {
-		global $post;
-
-		// It is a special case, for searching different posts
-		$custom_post = new CustomPost();
-		$providers[ $custom_post->get_unique_slug() ] = $custom_post;
-
-		// Gets custom posts from content
-		if ( isset( $post ) && isset( $post->post_content ) || $content ) {
-			if ( ! $content ) {
-				$content = $post->post_content;
-			}
-			preg_match_all( self::CUSTOM_POST_TYPE_REGEXP, $post->post_content, $custom_posts );
-			if ( isset( $custom_posts[ 1 ] ) ) {
-				foreach ( $custom_posts[ 1 ] as $custom_post_provider ) {
-					list( $slug, $post_type, $post_id ) = explode( '|', $custom_post_provider );
-					$custom_post = new CustomPost( $post_type, $post_id );
-					$providers[ $custom_post->get_unique_slug() ] = $custom_post;
-				}
-			}
-		}
-		return $providers;
 	}
 
 	/**

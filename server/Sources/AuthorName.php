@@ -9,7 +9,7 @@ use Toolset\DynamicSources\DynamicSources;
  *
  * @package toolset-dynamic-sources
  */
-class AuthorName extends AbstractSource {
+class AuthorName extends AuthorSource {
 	const NAME = 'author-name';
 
 	/**
@@ -19,15 +19,6 @@ class AuthorName extends AbstractSource {
 	 */
 	public function get_title() {
 		return __( 'Author Name', 'wpv-views' );
-	}
-
-	/**
-	 * Gets the Source group.
-	 *
-	 * @return string
-	 */
-	public function get_group() {
-		return DynamicSources::AUTHOR_GROUP;
 	}
 
 	/**

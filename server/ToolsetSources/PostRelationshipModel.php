@@ -40,27 +40,42 @@ class PostRelationshipModel {
 
 
 	/**
-	 * For a given post type that is either a parent or a child in this relationship,
-	 * return the name of the role.
+	 * For a given post type return the name of the role in relationship.
 	 *
 	 * @param string $post_type_slug
 	 *
-	 * @return string 'parent'|'child'
+	 * @return string 'parent'|'child'|'intermediary'
 	 */
 	public function get_role_by_post_type( $post_type_slug ) {
-		$parent_post_type = $this->definition_array['roles']['parent']['types'][0];
-
-		return ( $post_type_slug === $parent_post_type ? 'parent' : 'child' );
+		foreach ( $this->definition_array['roles'] as $role_name => $role ) {
+			if ( is_array( $role['types'] ) ) {
+				if ( $role['types'][0] === $post_type_slug ) {
+					return $role_name;
+				}
+			} else {
+				if ( $role['types'] === $post_type_slug ) {
+					return $role_name;
+				}
+			}
+		}
+		return 'child';
 	}
 
 
 	/**
-	 * @param string $role_name 'parent'|'child'
+	 * @param string $role_name 'parent'|'child'|'intermediary'
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	public function get_post_type_by_role( $role_name ) {
-		return $this->definition_array['roles'][ $role_name ]['types'][0];
+		if ( ! array_key_exists( $role_name, $this->definition_array['roles'] ) ) {
+			return null;
+		}
+
+		if ( is_array( $this->definition_array['roles'][ $role_name ]['types'] ) ) {
+			return reset( $this->definition_array['roles'][ $role_name ]['types'] );
+		}
+		return $this->definition_array['roles'][ $role_name ]['types'];
 	}
 
 
@@ -74,5 +89,20 @@ class PostRelationshipModel {
 
 	public function get_display_name() {
 		return $this->definition_array['labels']['plural'];
+	}
+
+	public function is_intermediary() {
+		return array_key_exists( 'intermediary', $this->definition_array['roles'] );
+	}
+
+	public function is_views_filtered_o_2_m() {
+		return array_key_exists( 'post_relationship_mode', $this->definition_array );
+	}
+
+	public function get_views_filtered_o_2_m_side() {
+		if ( array_key_exists( 'post_type', $this->definition_array ) ) {
+			return $this->get_role_by_post_type( $this->definition_array['post_type'] );
+		}
+		return null;
 	}
 }

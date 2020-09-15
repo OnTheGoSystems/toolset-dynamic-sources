@@ -22,6 +22,8 @@ class FieldModel {
 	/** @var array */
 	private $options;
 
+	private $is_repeatable;
+
 
 	/**
 	 * FieldModel constructor.
@@ -29,14 +31,17 @@ class FieldModel {
 	 * @param string $slug
 	 * @param string $name
 	 * @param string $type
+	 * @param $categories
+	 * @param $options
+	 * @param $is_repeatable
 	 */
-	public function __construct( $slug, $name, $type, $categories, $options, $is_repetitive ) {
+	public function __construct( $slug, $name, $type, $categories, $options, $is_repeatable ) {
 		$this->slug = $slug;
 		$this->name = $name;
 		$this->type = $type;
 		$this->categories = $categories;
 		$this->options = $options;
-		$this->is_repetitive = $is_repetitive;
+		$this->is_repeatable = $is_repeatable;
 	}
 
 
@@ -59,7 +64,7 @@ class FieldModel {
 	/**
 	 * @return string
 	 */
-	public function get_type() {
+	public function get_type_slug() {
 		return $this->type;
 	}
 
@@ -77,7 +82,7 @@ class FieldModel {
 	/**
 	 * @return array
 	 */
-	public function is_repetitive() {
-		return $this->is_repetitive;
+	public function is_repeatable() {
+		return $this->is_repeatable;
 	}
 }

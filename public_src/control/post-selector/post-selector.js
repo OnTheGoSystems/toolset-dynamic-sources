@@ -1,13 +1,15 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Spinner } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose, withInstanceId } from '@wordpress/compose';
 import { addQueryArgs } from '@wordpress/url';
 import { Select } from 'toolset/block/control';
-import { find, maxBy } from 'lodash';
-import { addAction } from '@wordpress/hooks';
+import { get, find, maxBy } from 'lodash';
+import { addAction, doAction } from '@wordpress/hooks';
 import './scss/edit.scss';
+import ViewService from './httpService';
 
 const { toolsetDynamicSourcesScriptData: i18n } = window;
 
@@ -23,14 +25,23 @@ class PostSelectorComponentClass extends Component {
 			postUrl: i18n.cache.__current_post[ 'post-url' ],
 			postId: i18n.cache.__current_post[ 'post-id' ],
 		};
+
+		if ( ! get( this.props.currentPost, 'meta.tb_preview_post', false ) ) {
+			this.savePreviewPostId( this.props.currentPostId, this.props.previewPost );
+		}
 	}
 
 	componentDidMount() {
 		addAction(
 			'tb.dynamicSources.actions.cache.updated',
-			'toolset-blocks',
+			'dynamic-source-post-selector',
 			this.updateBlockContentFromCache
 		);
+	}
+
+	savePreviewPostId = ( ctId, previewPostId ) => {
+		const service = new ViewService();
+		service.savePreviewPostId( ctId, previewPostId );
 	}
 
 	updateBlockContentFromCache = () => {
@@ -84,12 +95,26 @@ class PostSelectorComponentClass extends Component {
 		</span>;
 	};
 
+	/**
+	 * Updates dynamic source for the post type selected
+	 *
+	 * @param {int} postId Post ID.
+	 */
+	async updateDynamicSourceFromPostId( postId ) {
+		const postData = await apiFetch( { path: `/toolset-dynamic-sources/v1/search-post?id=${ postId }` } );
+		if ( postData && postData.length ) {
+			const source = await apiFetch( { path: `toolset-dynamic-sources/v1/get-source?post_type=${ postData[ 0 ].post_type }&post_id=${ postData[ 0 ].id }` } );
+			i18n.dynamicSources.__current_post = source.__current_post;
+		}
+	}
+
 	render() {
 		if ( ! i18n.previewPosts || i18n.previewPosts.length < 1 ) {
 			return null;
 		}
 
 		const onPostSelectorChanged = ( previewPost ) => {
+			this.updateDynamicSourceFromPostId( previewPost.value );
 			this.setState( { selectedPost: previewPost } );
 			this.props.setPreviewPost( previewPost.value );
 			this.props.editPost(
@@ -99,6 +124,10 @@ class PostSelectorComponentClass extends Component {
 					},
 				}
 			);
+			this.savePreviewPostId( this.props.currentPostId, previewPost.value );
+
+			// Trigger the updating of the Dynamic Sources cache to match the new preview post.
+			doAction( 'tb.dynamicSources.actions.cache.initiateFetching', true );
 		};
 
 		const previewPostWithLargestLabel = maxBy(
@@ -121,7 +150,19 @@ class PostSelectorComponentClass extends Component {
 				<Select
 					id={ `post-selector-${ this.props.instanceId }` }
 					value={ this.state.selectedPost }
-					options={ i18n.previewPosts }
+					defaultOptions={ i18n.previewPosts }
+					restInfo={
+						{
+							base: '/wp/v2/search',
+							args: {
+								search: '%s',
+								type: 'post',
+								// The subtype parameter is needed here in order to narrow the results down to posts of
+								// the post type the Content Template is assigned to.
+								subtype: i18n.previewPostTypes,
+							},
+						}
+					}
 					onChange={ onPostSelectorChanged }
 					className="toolset-blocks-post-selector-control"
 					styles={ postSelectorStyles }
@@ -137,13 +178,14 @@ const PostSelectorComponent = compose( [
 	withSelect(
 		( select ) => {
 			const { getPreviewPost, getCacheUpdating } = select( i18n.dynamicSourcesStore );
-			const { getCurrentPostId, hasChangedContent } = select( 'core/editor' );
+			const { getCurrentPost, getCurrentPostId, hasChangedContent } = select( 'core/editor' );
 
 			return {
 				previewPost: getPreviewPost(),
 				isCacheUpdating: getCacheUpdating(),
 				currentPostId: getCurrentPostId(),
 				hasChangedContent: hasChangedContent(),
+				currentPost: getCurrentPost(),
 			};
 		}
 	),
