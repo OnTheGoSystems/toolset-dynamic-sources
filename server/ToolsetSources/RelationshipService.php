@@ -132,23 +132,20 @@ class RelationshipService {
 	 * @return int
 	 */
 	private function get_intermediary( $related_to_post, PostRelationshipModel $relationship ) {
-		$top_current_post = apply_filters( 'wpv_filter_wpv_get_top_current_post', null );
-		// In REST requests, we need to get $top_current_post the harder way...
-		if ( ! $top_current_post ) {
-			global $WPV_settings;
-			$template_post_type = $relationship->get_other_post_type( $related_to_post->post_type );
-			$template_id = $WPV_settings->get_ct_assigned_to_single_post_type( $template_post_type );
-			$top_current_post = absint( get_post_meta( $template_id, 'tb_preview_post', true ) );
+		$top_current_post = $this->get_top_current_post();
+		$role = $relationship->get_views_filtered_o_2_m_side() ?: 'child';
+
+		$sides = [ $role => $related_to_post ];
+		// Check if we were able to get the top_current_post. If not, we'll just send a less precise query, which is
+		// the best we can do until needed data is available (probably after saving the post, CT, View or whatever is
+		// missing and can't be had).
+		if ( $top_current_post ) {
+			$top_current_post_role = $this->get_other_side_role( $role );
+			$sides[ $top_current_post_role ] = $top_current_post;
 		}
 
-		$role = $relationship->get_views_filtered_o_2_m_side() ?: 'child';
-		$top_current_post_role = $this->get_other_side_role( $role );
-
 		$post_ids = toolset_get_related_posts(
-			[
-				$role => $related_to_post,
-				$top_current_post_role => $top_current_post,
-			],
+			$sides,
 			$relationship->get_slug(),
 			[
 				'role_to_return' => 'intermediary',
@@ -157,6 +154,49 @@ class RelationshipService {
 		);
 
 		return array_shift( $post_ids );
+	}
+
+	/**
+	 * Getting the top_current_post is a dark art when inside a REST request...
+	 *
+	 * @return int|\WP_Post|null
+	 */
+	private function get_top_current_post() {
+		// Not inside a REST request, life is easy.
+		$top_current_post = apply_filters( 'wpv_filter_wpv_get_top_current_post', null );
+
+		// If we have the View id, and we are on a regular post, View parent post is the top_current_post.
+		if ( ! $top_current_post ) {
+			$view_id = toolset_getget( 'view-id', null );
+			$view_parent_post_id = apply_filters( 'wpv_filter_get_view_parent_post_id', null, $view_id );
+			$top_current_post = get_post( $view_parent_post_id );
+		}
+
+		// We can also try to get the top current post from HTTP_REFERER, as a fallback.
+		if ( ! $top_current_post ) {
+			if ( array_key_exists( 'HTTP_REFERER', $_SERVER ) ) {
+				$query = parse_url( $_SERVER['HTTP_REFERER'], PHP_URL_QUERY );
+				$query_data = explode( '&', $query );
+				$keyed_query_data = [];
+				foreach ( $query_data as $item ) {
+					$exploded_item = explode( '=', $item );
+					$keyed_query_data[ $exploded_item[0] ] = $exploded_item[1];
+				}
+				if ( array_key_exists( 'post', $keyed_query_data ) ) {
+					$top_current_post = get_post( $keyed_query_data['post'] );
+				}
+			}
+		}
+
+		// If we are inside a CT, $top_current_post is actually the preview post.
+		if (
+			$top_current_post &&
+			'view-template' === $top_current_post->post_type
+		) {
+			$top_current_post = get_post_meta( $top_current_post->ID, 'tb_preview_post', true );
+		}
+
+		return $top_current_post;
 	}
 
 	/**

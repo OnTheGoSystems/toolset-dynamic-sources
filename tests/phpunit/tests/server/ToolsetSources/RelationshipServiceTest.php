@@ -4,7 +4,9 @@ namespace OTGS\Toolset\DynamicSources\Tests\ToolsetSources;
 
 use Mockery;
 use OTGS_TestCase;
+use Toolset\DynamicSources\ToolsetSources\PostRelationshipModel;
 use Toolset\DynamicSources\ToolsetSources\RelationshipService;
+use WP_Mock;
 
 class RelationshipServiceTest extends OTGS_TestCase {
 	/** @var RelationshipService $subject */
@@ -54,5 +56,44 @@ class RelationshipServiceTest extends OTGS_TestCase {
 
 		$this->assertSame( 'parent', $role->get_name() );
 		$this->assertSame( 'Owner', $role->get_label() );
+	}
+
+	/**
+	 * @test
+	 * @dataProvider provide_relationships
+	 *
+	 * @param int $related_to_post
+	 * @param PostRelationshipModel $relationship
+	 * @param string $target_role
+	 */
+	public function it_returns_related_posts( $related_to_post, PostRelationshipModel $relationship, $target_role ) {
+		WP_Mock::userFunction( 'toolset_get_related_post' )
+			->withArgs( [ $related_to_post, $relationship->get_slug(), $target_role ] )
+			->once()
+			->andReturn( 2 );
+
+		$this->assertSame(
+			2,
+			$this->subject->get_related_post( $related_to_post, $relationship, $target_role )
+		);
+	}
+
+	/**
+	 * @return array[]
+	 */
+	public function provide_relationships() {
+		return [
+			[
+				1,
+				new PostRelationshipModel( [
+					'roles' => [
+						'parent' => [ 'types' => [ 0 => 'page' ] ],
+						'child' => [ 'types' => [ 0 => 'post' ] ],
+					],
+					'slug' => 'page-post',
+				] ),
+				'parent',
+			],
+		];
 	}
 }

@@ -16,7 +16,7 @@
  * Note that this number schema is broken until 1.1.0 at least...
  */
 
-$toolset_dynamic_sources_version = 116000;
+$toolset_dynamic_sources_version = 117000;
 
 /**
  * Priority is: 100000 - $toolset_dynamic_sources_version <= 0
